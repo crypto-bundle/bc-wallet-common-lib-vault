@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 
 	vaultApi "github.com/hashicorp/vault/api"
-	userPassAuth "github.com/hashicorp/vault/api/auth/userpass"
+	k8sAuth "github.com/hashicorp/vault/api/auth/kubernetes"
+	userpassAuth "github.com/hashicorp/vault/api/auth/userpass"
 )
 
 const githubAuthPath = "auth/github/login"
@@ -15,18 +16,33 @@ type Vaulter interface {
 	Decrypt(cipherBytes []byte) ([]byte, error)
 
 	GetCredentialsBytes() (b []byte, err error)
+	GetCredentialsBytesByPath(path string) (b []byte, err error)
 	GetCredentialsByPathAndKey(path, field string) (string, error)
 	GetCredentialsByPathAndKeys(path string, fields ...string) (map[string]string, error)
 }
 
 type service struct {
-	client *vaultApi.Client
-	cfg    *Config
+	client   *vaultApi.Client
+	authInfo *vaultApi.Secret
+	cfg      *Config
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
 func (s *service) GetCredentialsBytes() (b []byte, err error) {
 	secret, err := s.client.Logical().Read(s.cfg.DataPath)
+	if err != nil {
+		return nil, NewInternalError(ErrReadSecret, err)
+	}
+	if secret == nil {
+		return nil, ErrEmptySecret
+	}
+
+	return json.Marshal(secret.Data["data"])
+}
+
+// GetCredentialsBytesByPath returns all secrets bytes from the specified path.
+func (s *service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
+	secret, err := s.client.Logical().Read(path)
 	if err != nil {
 		return nil, NewInternalError(ErrReadSecret, err)
 	}
@@ -99,6 +115,34 @@ func (s *service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 	return res, nil
 }
 
+func (s *service) login(ctx context.Context) error {
+	auth, err := k8sAuth.NewKubernetesAuth(
+		s.cfg.AppRole,
+		k8sAuth.WithServiceAccountTokenPath(s.cfg.KubeSATokenPath),
+		k8sAuth.WithMountPath(s.cfg.AuthPath),
+	)
+	if err != nil {
+		return NewInternalError(ErrK8sAuthInit, err)
+	}
+
+	authInfo, err := s.client.Auth().Login(ctx, auth)
+	if err != nil {
+		return NewInternalError(ErrK8sLogin, err)
+	}
+	if authInfo == nil {
+		return ErrNotExistingAuthInfo
+	}
+
+	s.setToken(authInfo)
+
+	return nil
+}
+
+func (s *service) setToken(auth *vaultApi.Secret) {
+	s.authInfo = auth
+	s.client.SetToken(auth.Auth.ClientToken)
+}
+
 // NewClientByGithubToken initialize vault client with github_token authorization.
 func NewClientByGithubToken(cfg *Config, ghToken string) (Vaulter, error) {
 	clientOpts := vaultApi.DefaultConfig()
@@ -125,11 +169,42 @@ func NewClientByGithubToken(cfg *Config, ghToken string) (Vaulter, error) {
 	}, nil
 }
 
+// NewClientByUserPass initialize vault client with user and password
+// authentication.
+func NewClientByUserPass(ctx context.Context, cfg *Config) (Vaulter, error) {
+	clientOpts := vaultApi.DefaultConfig()
+	clientOpts.Address = cfg.Address
+	client, err := vaultApi.NewClient(clientOpts)
+	if err != nil {
+		return nil, NewInternalError(ErrVaultAPIClientInit, err)
+	}
+
+	auth, err := userpassAuth.NewUserpassAuth(cfg.Username, &userpassAuth.Password{FromString: cfg.Password})
+	if err != nil {
+		return nil, NewInternalError(ErrUserpassInit, err)
+	}
+
+	secret, err := client.Auth().Login(ctx, auth)
+	if err != nil {
+		return nil, NewInternalError(ErrUserpassLogin, err)
+	}
+	if secret == nil {
+		return nil, ErrEmptySecret
+	}
+
+	client.SetToken(secret.Auth.ClientToken)
+
+	return &service{
+		client: client,
+		cfg:    cfg,
+	}, nil
+}
+
 // NewClient initialize vault client with service account token authorization.
 func NewClient(ctx context.Context, cfg *Config) (Vaulter, error) {
 	// to have the fallback way for application config initialization only from envs.
 	if cfg.IsEmpty() {
-		return nil, nil
+		return nil, ErrEmptyConfig
 	}
 
 	clientOpts := vaultApi.DefaultConfig()
@@ -140,29 +215,17 @@ func NewClient(ctx context.Context, cfg *Config) (Vaulter, error) {
 		return nil, NewInternalError(ErrVaultAPIClientInit, err)
 	}
 
-	password := &userPassAuth.Password{
-		FromFile:   "",
-		FromEnv:    "",
-		FromString: cfg.AuthPassword,
-	}
-
-	auth, err := userPassAuth.NewUserpassAuth(cfg.AuthUsername, password)
-	if err != nil {
-		return nil, NewInternalError(ErrUserNamePathAuthInit, err)
-	}
-
-	authInfo, err := client.Auth().Login(ctx, auth)
-	if err != nil {
-		return nil, NewInternalError(ErrUserNamePathLogin, err)
-	}
-	if authInfo == nil {
-		return nil, NewInternalError(ErrNotExistingAuthInfo, err)
-	}
-
-	client.SetToken(authInfo.Auth.ClientToken)
-
-	return &service{
+	vaultSvc := &service{
 		client: client,
 		cfg:    cfg,
-	}, nil
+	}
+
+	err = vaultSvc.login(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	go vaultSvc.tokenRenew(ctx)
+
+	return vaultSvc, nil
 }

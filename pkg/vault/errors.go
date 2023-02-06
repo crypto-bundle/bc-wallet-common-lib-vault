@@ -5,13 +5,11 @@ import (
 )
 
 const (
-	ErrVaultAPIClientInit InternalError = "unable to initialize vault client"
-	ErrK8sAuthInit        InternalError = "unable to initialize kubernetes auth method"
-	ErrK8sLogin           InternalError = "unable to log in with kubernetes auth"
-
-	ErrUserNamePathAuthInit InternalError = "unable to initialize username and pass auth method"
-	ErrUserNamePathLogin    InternalError = "unable to log in with username and path auth"
-
+	ErrVaultAPIClientInit  InternalError = "unable to initialize vault client"
+	ErrK8sAuthInit         InternalError = "unable to initialize kubernetes auth method"
+	ErrUserpassInit        InternalError = "unable to initialize userpass auth method"
+	ErrK8sLogin            InternalError = "unable to log in with kubernetes auth"
+	ErrUserpassLogin       InternalError = "unable to log in with user and password"
 	ErrNotExistingAuthInfo InternalError = "no auth info was returned after login"
 	ErrReadSecret          InternalError = "unable to read secret"
 	ErrEmptySecret         InternalError = "unable to get secret"
@@ -19,6 +17,8 @@ const (
 	ErrNotExistingKey      InternalError = "missed key in secret"
 	ErrKeyType             InternalError = "unexpected key type in secret"
 	ErrTransitSecretFormat InternalError = "unexpected format for transit secret"
+	ErrInitTokenTTLWatcher InternalError = "unable to initialize auth token lifetime watcher"
+	ErrEmptyConfig         InternalError = "config is empty"
 )
 
 type InternalError string
