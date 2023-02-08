@@ -1,7 +1,12 @@
 package vault
 
 import (
+	"errors"
 	"fmt"
+)
+
+var (
+	ErrConfigIsNotValid = errors.New("config is not valid.some fields is missing")
 )
 
 const (

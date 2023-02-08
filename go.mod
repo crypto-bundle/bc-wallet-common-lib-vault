@@ -6,6 +6,7 @@ require (
 	github.com/hashicorp/vault/api v1.8.0
 	github.com/hashicorp/vault/api/auth/kubernetes v0.3.0
 	github.com/hashicorp/vault/api/auth/userpass v0.1.0
+	github.com/kelseyhightower/envconfig v1.4.0
 )
 
 require (
