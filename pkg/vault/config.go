@@ -40,7 +40,7 @@ func (c *Config) GePassword() string {
 }
 
 func (c *Config) GeDataPath() string {
-	return c.TransitKey
+	return c.DataPath
 }
 
 func (c *Config) GeTransitKey() string {
