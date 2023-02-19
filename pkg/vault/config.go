@@ -66,3 +66,7 @@ func (c *Config) Prepare() error {
 
 	return nil
 }
+
+func (c *Config) PrepareWith(dependentCfgList ...interface{}) error {
+	return nil
+}
