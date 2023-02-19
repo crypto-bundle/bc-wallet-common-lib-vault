@@ -1,9 +1,5 @@
 package vault
 
-import (
-	"github.com/kelseyhightower/envconfig"
-)
-
 type Config struct {
 	Address         string `envconfig:"VAULT_ADDRESS" default:""`
 	AppRole         string `envconfig:"VAULT_APP_ROLE" default:""`
@@ -58,11 +54,6 @@ func (c *Config) IsEmpty() bool {
 
 // Prepare variables to static configuration
 func (c *Config) Prepare() error {
-	err := envconfig.Process("", c)
-	if err != nil {
-		return err
-	}
-
 	var configIsNotValid = len(c.KubeSATokenPath) == 0 ||
 		len(c.AuthPath) == 0 ||
 		len(c.AppRole) == 0 ||
