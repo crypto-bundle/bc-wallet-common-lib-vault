@@ -19,9 +19,9 @@ func (s *service) Login(_ context.Context) (*vaultApi.Client, error) {
 	return s.client, nil
 }
 
-// NewClientByToken initialize vault client with single token
+// NewClient initialize vault client with single token
 // authentication.
-func NewClientByToken(ctx context.Context, cfg configService) (*service, error) {
+func NewClient(ctx context.Context, cfg configService) (*service, error) {
 	clientOpts := vaultApi.DefaultConfig()
 	clientOpts.Address = cfg.GetAddress()
 

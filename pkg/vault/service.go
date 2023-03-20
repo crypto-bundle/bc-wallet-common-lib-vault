@@ -3,11 +3,6 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/github"
-	"github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/kubernates"
-	"github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/userpass"
-
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
@@ -127,45 +122,58 @@ func (s *service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 
 	return res, nil
 }
-func NewService(ctx context.Context, cfg configService) (*service, error) {
-	var clientSvc clientService = nil
-	switch cfg.GetAuthMethod() {
-	case authMethodGithub:
-		svc, err := github.NewClient(ctx, cfg)
-		if err != nil {
-			return nil, err
-		}
 
-		clientSvc = svc
-
-	case authMethodKubernetes:
-		svc, err := kubernates.NewClient(ctx, cfg)
-		if err != nil {
-			return nil, err
-		}
-
-		clientSvc = svc
-
-	case authMethodUserpass:
-		svc, err := userpass.NewClient(ctx, cfg)
-		if err != nil {
-			return nil, err
-		}
-
-		clientSvc = svc
-	default:
-		return nil, fmt.Errorf("unknown auth method: %s", cfg.GetAuthMethod())
-	}
-
-	loggedInClient, err := clientSvc.Login(ctx)
+func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
+	loggedInVaultClient, err := s.clientSvc.Login(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	vaultSvc := &service{
-		client: loggedInClient,
-		cfg:    cfg,
-	}
+	s.client = loggedInVaultClient
 
-	return vaultSvc, nil
+	return s.client, nil
+}
+
+func NewService(ctx context.Context,
+	cfg configService,
+	client clientService,
+) (*service, error) {
+	//var clientSvc clientService = nil
+	//switch cfg.GetAuthMethod() {
+	//case authMethodGithub:
+	//	svc, err := github.NewClient(ctx, cfg)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	clientSvc = svc
+	//
+	//case authMethodKubernetes:
+	//	svc, err := kubernates.NewClient(ctx, cfg)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	clientSvc = svc
+	//
+	//case authMethodUserpass:
+	//	svc, err := userpass.NewClient(ctx, cfg)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	clientSvc = svc
+	//default:
+	//	return nil, fmt.Errorf("unknown auth method: %s", cfg.GetAuthMethod())
+	//}
+
+	//loggedInClient, err := clientSvc.Login(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	return &service{
+		clientSvc: client,
+		cfg:       cfg,
+	}, nil
 }

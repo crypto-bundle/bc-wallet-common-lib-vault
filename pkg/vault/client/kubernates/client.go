@@ -37,7 +37,7 @@ func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 }
 
 // NewClient initialize vault client with service account token authorization.
-func NewClient(ctx context.Context, cfg configService) (*service, error) {
+func NewClient(_ context.Context, cfg configService) (*service, error) {
 	clientOpts := vaultApi.DefaultConfig()
 	clientOpts.Address = cfg.GetAddress()
 
