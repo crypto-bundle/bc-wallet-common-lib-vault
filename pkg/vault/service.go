@@ -107,13 +107,13 @@ func (s *service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 	}
 
 	for _, k := range keys {
-		keyVal, ok := data[k]
-		if !ok {
+		keyVal, isExists := data[k]
+		if !isExists {
 			return res, ErrNotExistingKey.WithMsg(k)
 		}
 
-		keyString, ok := keyVal.(string)
-		if !ok {
+		keyString, isExists := keyVal.(string)
+		if !isExists {
 			return res, ErrKeyType.WithMsg(k)
 		}
 
@@ -138,40 +138,6 @@ func NewService(ctx context.Context,
 	cfg configService,
 	client clientService,
 ) (*service, error) {
-	//var clientSvc clientService = nil
-	//switch cfg.GetAuthMethod() {
-	//case authMethodGithub:
-	//	svc, err := github.NewClient(ctx, cfg)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	clientSvc = svc
-	//
-	//case authMethodKubernetes:
-	//	svc, err := kubernates.NewClient(ctx, cfg)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	clientSvc = svc
-	//
-	//case authMethodUserpass:
-	//	svc, err := userpass.NewClient(ctx, cfg)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//	clientSvc = svc
-	//default:
-	//	return nil, fmt.Errorf("unknown auth method: %s", cfg.GetAuthMethod())
-	//}
-
-	//loggedInClient, err := clientSvc.Login(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	return &service{
 		clientSvc: client,
 		cfg:       cfg,
