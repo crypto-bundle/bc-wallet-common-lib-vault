@@ -33,6 +33,8 @@ type Service struct {
 	clientSvc clientService
 	authInfo  *vaultApi.Secret
 	cfg       configService
+
+	loadedSecrets map[string]string
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
@@ -139,7 +141,8 @@ func NewService(ctx context.Context,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		clientSvc: client,
-		cfg:       cfg,
+		clientSvc:     client,
+		cfg:           cfg,
+		loadedSecrets: make(map[string]string, 0),
 	}, nil
 }
