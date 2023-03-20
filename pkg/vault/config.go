@@ -3,9 +3,10 @@ package vault
 import "fmt"
 
 type BaseConfig struct {
-	Host     string `envconfig:"VAULT_HOST" default:"vault"`
-	Port     uint32 `envconfig:"VAULT_PORT" default:"8200"`
-	UseHTTPS bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
+	Host       string `envconfig:"VAULT_HOST" default:"vault"`
+	Port       uint32 `envconfig:"VAULT_PORT" default:"8200"`
+	UseHTTPS   bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
+	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
 
 	DataPath   string `envconfig:"VAULT_DATA_PATH" default:""`
 	TransitKey string `envconfig:"VAULT_TRANSIT_KEY" default:""`
@@ -31,12 +32,16 @@ func (c *BaseConfig) IsUseHTTPS() bool {
 	return c.UseHTTPS
 }
 
-func (c *BaseConfig) GeDataPath() string {
+func (c *BaseConfig) GetDataPath() string {
 	return c.DataPath
 }
 
-func (c *BaseConfig) GeTransitKey() string {
+func (c *BaseConfig) GetTransitKey() string {
 	return c.TransitKey
+}
+
+func (c *BaseConfig) GetAuthMethod() string {
+	return c.AuthMethod
 }
 
 func (c *BaseConfig) Prepare() error {
