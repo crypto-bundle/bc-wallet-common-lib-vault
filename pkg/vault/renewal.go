@@ -27,10 +27,11 @@ func (s *service) tokenRenew(ctx context.Context) {
 		}
 
 		if renewed&expiringAuthToken != 0 {
-			err = s.login(ctx)
-			if err != nil {
+			vaultClient, loginErr := s.clientSvc.Login(ctx)
+			if loginErr != nil {
 				log.Fatalf("login authentication error: %v", err)
 			}
+			s.client = vaultClient
 		}
 	}
 }
@@ -50,8 +51,8 @@ func (s *service) renew(ctx context.Context, authToken *vault.Secret) (renewResu
 		select {
 		case <-ctx.Done():
 			return exitRequested, nil
-		case err := <-authTokenWatcher.DoneCh():
-			return expiringAuthToken, err
+		case doneErr := <-authTokenWatcher.DoneCh():
+			return expiringAuthToken, doneErr
 		case info := <-authTokenWatcher.RenewCh():
 			log.Printf("auth token: successfully renewed; remaining duration: %ds", info.Secret.Auth.LeaseDuration)
 		}

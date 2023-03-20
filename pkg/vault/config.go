@@ -1,72 +1,48 @@
 package vault
 
-type Config struct {
-	Address         string `envconfig:"VAULT_ADDRESS" default:""`
-	AppRole         string `envconfig:"VAULT_APP_ROLE" default:""`
-	AuthPath        string `envconfig:"VAULT_AUTH_PATH" default:""`
-	KubeSATokenPath string `envconfig:"VAULT_KUBE_SA_TOKEN_PATH" default:""`
-	Username        string `envconfig:"VAULT_USERNAME" default:""`
-	Password        string `envconfig:"VAULT_PASSWORD" default:""`
-	DataPath        string `envconfig:"VAULT_DATA_PATH" default:""`
-	TransitKey      string `envconfig:"VAULT_TRANSIT_KEY" default:""`
+import "fmt"
+
+type BaseConfig struct {
+	Host     string `envconfig:"VAULT_HOST" default:"vault"`
+	Port     uint32 `envconfig:"VAULT_PORT" default:"8200"`
+	UseHTTPS bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
+
+	DataPath   string `envconfig:"VAULT_DATA_PATH" default:""`
+	TransitKey string `envconfig:"VAULT_TRANSIT_KEY" default:""`
 }
 
-func (c *Config) GetAddress() string {
-	return c.Address
+func (c *BaseConfig) GetAddress() string {
+	protocol := "http"
+	if c.UseHTTPS {
+		protocol = "https"
+	}
+	return fmt.Sprintf("%s://%s,%d", protocol, c.Host, c.Port)
 }
 
-func (c *Config) GetAppRole() string {
-	return c.AppRole
+func (c *BaseConfig) GetHost() string {
+	return c.Host
 }
 
-func (c *Config) GetAuthPath() string {
-	return c.AuthPath
+func (c *BaseConfig) GetPort() uint32 {
+	return c.Port
 }
 
-func (c *Config) GetKubernatesSATokenPath() string {
-	return c.KubeSATokenPath
+func (c *BaseConfig) IsUseHTTPS() bool {
+	return c.UseHTTPS
 }
 
-func (c *Config) GetUsername() string {
-	return c.Username
-}
-
-func (c *Config) GePassword() string {
-	return c.Password
-}
-
-func (c *Config) GeDataPath() string {
+func (c *BaseConfig) GeDataPath() string {
 	return c.DataPath
 }
 
-func (c *Config) GeTransitKey() string {
+func (c *BaseConfig) GeTransitKey() string {
 	return c.TransitKey
 }
 
-// IsEmpty returns true if some prop doesn't initialized except for transit key
-func (c *Config) IsEmpty() bool {
-	return len(c.KubeSATokenPath) == 0 ||
-		len(c.AuthPath) == 0 ||
-		len(c.AppRole) == 0 ||
-		len(c.DataPath) == 0 ||
-		len(c.Address) == 0
-}
-
-// Prepare variables to static configuration
-func (c *Config) Prepare() error {
-	var configIsNotValid = len(c.KubeSATokenPath) == 0 ||
-		len(c.AuthPath) == 0 ||
-		len(c.AppRole) == 0 ||
-		len(c.DataPath) == 0 ||
-		len(c.Address) == 0
-
-	if configIsNotValid {
-		return ErrConfigIsNotValid
-	}
-
+func (c *BaseConfig) Prepare() error {
 	return nil
 }
 
-func (c *Config) PrepareWith(dependentCfgList ...interface{}) error {
+func (c *BaseConfig) PrepareWith(dependentCfgList ...interface{}) error {
 	return nil
 }
