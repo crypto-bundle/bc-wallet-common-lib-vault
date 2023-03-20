@@ -28,7 +28,7 @@ type Vaulter interface {
 	GetCredentialsByPathAndKeys(path string, fields ...string) (map[string]string, error)
 }
 
-type service struct {
+type Service struct {
 	client    *vaultApi.Client
 	clientSvc clientService
 	authInfo  *vaultApi.Secret
@@ -36,7 +36,7 @@ type service struct {
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
-func (s *service) GetCredentialsBytes() (b []byte, err error) {
+func (s *Service) GetCredentialsBytes() (b []byte, err error) {
 	secret, err := s.client.Logical().Read(s.cfg.GetDataPath())
 	if err != nil {
 		return nil, NewInternalError(ErrReadSecret, err)
@@ -49,7 +49,7 @@ func (s *service) GetCredentialsBytes() (b []byte, err error) {
 }
 
 // GetCredentialsBytesByPath returns all secrets bytes from the specified path.
-func (s *service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
+func (s *Service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
 		return nil, NewInternalError(ErrReadSecret, err)
@@ -62,7 +62,7 @@ func (s *service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
 }
 
 // GetCredentialsByPathAndKey returns secret by path and field.
-func (s *service) GetCredentialsByPathAndKey(path, key string) (string, error) {
+func (s *Service) GetCredentialsByPathAndKey(path, key string) (string, error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
 		return "", NewInternalError(ErrReadSecret, err)
@@ -90,7 +90,7 @@ func (s *service) GetCredentialsByPathAndKey(path, key string) (string, error) {
 }
 
 // GetCredentialsByPathAndKeys returns fields sets from path.
-func (s *service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[string]string, error) {
+func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[string]string, error) {
 	res := make(map[string]string, len(keys))
 
 	secret, err := s.client.Logical().Read(path)
@@ -123,7 +123,7 @@ func (s *service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 	return res, nil
 }
 
-func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
+func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	loggedInVaultClient, err := s.clientSvc.Login(ctx)
 	if err != nil {
 		return nil, err
@@ -137,8 +137,8 @@ func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 func NewService(ctx context.Context,
 	cfg configService,
 	client clientService,
-) (*service, error) {
-	return &service{
+) (*Service, error) {
+	return &Service{
 		clientSvc: client,
 		cfg:       cfg,
 	}, nil

@@ -15,7 +15,7 @@ const (
 	expiringAuthToken
 )
 
-func (s *service) tokenRenew(ctx context.Context) {
+func (s *Service) tokenRenew(ctx context.Context) {
 	for {
 		renewed, err := s.renew(ctx, s.authInfo)
 		if err != nil {
@@ -36,7 +36,7 @@ func (s *service) tokenRenew(ctx context.Context) {
 	}
 }
 
-func (s *service) renew(ctx context.Context, authToken *vault.Secret) (renewResult, error) {
+func (s *Service) renew(ctx context.Context, authToken *vault.Secret) (renewResult, error) {
 	authTokenWatcher, err := s.client.NewLifetimeWatcher(&vault.LifetimeWatcherInput{
 		Secret: authToken,
 	})

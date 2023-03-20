@@ -12,7 +12,7 @@ const (
 )
 
 // Encrypt get encrypted ciphertext bytes via vault transit secret engine.
-func (s *service) Encrypt(toEncrypt []byte) ([]byte, error) {
+func (s *Service) Encrypt(toEncrypt []byte) ([]byte, error) {
 	b64Val := b64.StdEncoding.EncodeToString(toEncrypt)
 	path := encryptPath + s.cfg.GetTransitKey()
 
@@ -33,7 +33,7 @@ func (s *service) Encrypt(toEncrypt []byte) ([]byte, error) {
 }
 
 // Decrypt get decrypted value from ciphertext via vault transit secret engine.
-func (s *service) Decrypt(cipherBytes []byte) ([]byte, error) {
+func (s *Service) Decrypt(cipherBytes []byte) ([]byte, error) {
 	path := decryptPath + s.cfg.GetTransitKey()
 
 	secret, err := s.client.Logical().Write(path, map[string]interface{}{
