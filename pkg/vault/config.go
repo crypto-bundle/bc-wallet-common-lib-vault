@@ -20,7 +20,7 @@ func (c *BaseConfig) GetAddress() string {
 	if c.UseHTTPS {
 		protocol = "https"
 	}
-	return fmt.Sprintf("%s://%s,%d", protocol, c.Host, c.Port)
+	return fmt.Sprintf("%s://%s:%d", protocol, c.Host, c.Port)
 }
 
 func (c *BaseConfig) GetHost() string {
@@ -69,5 +69,5 @@ func (c *BaseConfig) PrepareWith(dependentCfgList ...interface{}) error {
 		}
 	}
 
-	return c.Prepare()
+	return nil
 }
