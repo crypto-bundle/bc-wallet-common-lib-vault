@@ -11,10 +11,6 @@ const vaultVarPrefixDelimiter = "-" // delimiter between vault variable name and
 
 const vaultDataPathDelimiter = "," // vault DataPath env variable can be a list of paths, separated by delimiter
 
-const vaultTestDefaultPath = "test" // for testing purposes
-
-const vaultPrefixEnvName = "ENVIRONMENT" // name of env variable which may contain vault variable prefix
-
 func (s *Service) GetByName(keyName string) (data string, isExists bool) {
 	secretData, isExists := s.loadedSecrets[keyName]
 	if !isExists {
