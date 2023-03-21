@@ -10,6 +10,9 @@ type BaseConfig struct {
 
 	DataPath   string `envconfig:"VAULT_DATA_PATH" default:""`
 	TransitKey string `envconfig:"VAULT_TRANSIT_KEY" default:""`
+
+	// dependencies
+	baseAppCfgSrv baseApplicationConfigService
 }
 
 func (c *BaseConfig) GetAddress() string {
@@ -44,10 +47,27 @@ func (c *BaseConfig) GetAuthMethod() string {
 	return c.AuthMethod
 }
 
+func (c *BaseConfig) GetApplicationStageName() string {
+	return c.baseAppCfgSrv.GetStageName()
+}
+
+func (c *BaseConfig) GetApplicationEnvironment() string {
+	return c.baseAppCfgSrv.GetEnvironmentName()
+}
+
 func (c *BaseConfig) Prepare() error {
 	return nil
 }
 
 func (c *BaseConfig) PrepareWith(dependentCfgList ...interface{}) error {
-	return nil
+	for _, cfgSrv := range dependentCfgList {
+		switch castedCfg := cfgSrv.(type) {
+		case baseApplicationConfigService:
+			c.baseAppCfgSrv = castedCfg
+		default:
+			continue
+		}
+	}
+
+	return c.Prepare()
 }

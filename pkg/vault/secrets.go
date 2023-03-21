@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 )
 
@@ -30,10 +29,7 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 
 	paths := strings.Split(s.cfg.GetDataPath(), vaultDataPathDelimiter)
 
-	vaultPrefix, isExists := os.LookupEnv(vaultPrefixEnvName)
-	if !isExists {
-		vaultPrefix = "dev"
-	}
+	vaultPrefix := s.cfg.GetApplicationStageName()
 
 	for _, v := range paths {
 		path := strings.TrimSpace(v)

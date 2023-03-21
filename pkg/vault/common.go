@@ -37,9 +37,17 @@ type configService interface {
 	//GetKubernatesAppRole() string
 	//GetKubernatesSATokenPath() string
 	//GetKubernatesAuthPath() string
+
+	GetApplicationStageName() string
+	GetApplicationEnvironment() string
 }
 
 type clientService interface {
 	GetClient() *vaultApi.Client
 	Login(context.Context) (*vaultApi.Client, error)
+}
+
+type baseApplicationConfigService interface {
+	GetEnvironmentName() string
+	GetStageName() string
 }
