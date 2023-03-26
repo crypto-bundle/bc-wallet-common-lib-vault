@@ -79,10 +79,9 @@ func main() {
 }
 ```
 
-## Authors
+## Contributors
 
-Author:
-* [@gudron (Alex V Kotelnikov)](https://github.com/gudron)
+* Author and maintainer - [@gudron (Alex V Kotelnikov)](https://github.com/gudron)
 
 ## Licence
 
