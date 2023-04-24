@@ -24,9 +24,9 @@ import (
 	"errors"
 	"log"
 
-	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/envconfig"
-	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
-	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
+	commonEnvConfig "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-config/pkg/config"
+	commonVault "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-vault/pkg/vault"
+	commonVaultTokenClient "gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
 
 type VaultWrappedConfig struct {
@@ -85,4 +85,6 @@ func main() {
 
 ## Licence
 
-**bc-wallet-common-lib-vault** is licensed under the [MIT](./LICENSE) License.
+**bc-wallet-common-lib-vault** has a proprietary license.
+
+Switched to proprietary license from MIT - [CHANGELOG.MD - v0.0.14](./CHANGELOG.md)

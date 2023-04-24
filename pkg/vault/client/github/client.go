@@ -1,9 +1,10 @@
 package github
 
 import (
+	"context"
 	"errors"
+
 	vaultApi "github.com/hashicorp/vault/api"
-	"golang.org/x/net/context"
 )
 
 var (

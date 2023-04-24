@@ -1,6 +1,6 @@
-module github.com/crypto-bundle/bc-wallet-common-lib-vault
+module gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-vault
 
-go 1.17
+go 1.19
 
 require (
 	github.com/hashicorp/vault/api v1.8.0
