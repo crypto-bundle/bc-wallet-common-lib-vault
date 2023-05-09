@@ -19,3 +19,4 @@ build/certs
 build/*
 
 deploy/certs/*
+deploy/helm/*/values_local.yaml

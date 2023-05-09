@@ -17,3 +17,8 @@ and specifying in the README.md file in the section of authors and contributors.
 The commit is signed with the key -
 gudron2s@gmail.com
 E456BB23A18A9347E952DBC6655133DD561BF3EC
+
+
+## [v0.0.15] - 09.05.2023
+### Changed
+* Added Vault helm-chart for local development. Chart cloned from [official Vault repository](https://github.com/hashicorp/vault-helm)
