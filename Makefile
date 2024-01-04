@@ -14,7 +14,7 @@ deploy_vault:
 	$(eval context=$(or $(context),k0s-dev-cluster))
 	$(eval platform=$(or $(platform),linux/amd64))
 
-	helm --kubeconfig ~/.kube/k0s_rus_dev_stand.config --kube-context $(context) upgrade \
+	helm --kube-context $(context) upgrade \
 		--install vault \
 		--values=./deploy/helm/vault/values.yaml \
 		--values=./deploy/helm/vault/values_$(env).yaml \
@@ -26,6 +26,6 @@ destroy_vault:
 	$(eval context=$(or $(context),k0s-dev-cluster))
 	$(eval platform=$(or $(platform),linux/amd64))
 
-	helm --kubeconfig ~/.kube/k0s_rus_dev_stand.config --kube-context $(context) uninstall vault
+	helm --kube-context $(context) uninstall vault
 
 .PHONY: deploy_vault
