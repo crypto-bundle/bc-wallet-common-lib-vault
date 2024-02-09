@@ -1,4 +1,4 @@
-module gitlab.heronodes.io/bc-platform/bc-wallet-common-lib-vault
+module github.com/crypto-bundle/bc-wallet-common-lib-vault
 
 go 1.19
 
