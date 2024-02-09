@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	"encoding/json"
+
 	vaultApi "github.com/hashicorp/vault/api"
 )
 

@@ -3,6 +3,7 @@ package userpass
 import (
 	"context"
 	"errors"
+
 	vaultApi "github.com/hashicorp/vault/api"
 	userpassAuth "github.com/hashicorp/vault/api/auth/userpass"
 )

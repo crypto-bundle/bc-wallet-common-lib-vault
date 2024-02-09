@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+
 	vaultApi "github.com/hashicorp/vault/api"
 )
 

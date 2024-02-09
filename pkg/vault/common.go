@@ -2,6 +2,7 @@ package vault
 
 import (
 	"context"
+
 	vaultApi "github.com/hashicorp/vault/api"
 )
 

@@ -24,7 +24,7 @@ import (
 	"errors"
 	"log"
 
-	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/envconfig"
+	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
