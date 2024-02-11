@@ -1,7 +1,29 @@
 # Change Log
 
-## [v0.0.1] - 07.02.2023 23:46 MSK
+## [v0.0.1] - 08.03.2022 00:49 MSK
 ### Added 
+* Added vault client
+* Added vault client config
+
+## [v0.0.2] - 09.03.2022 18:41 MSK
+### Changed
+* Moved from common dir to root of lib-vault directory
+
+## [v0.0.3] - 07.02.2023 23:11 MSK
+### Changed
+* Lib-vault moved to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-vault
+* Added MIT license
+
+## [v0.0.4] - 08.02.2023 10:25 MSK
+### Changed
+* Added config init flow via envconfig
+
+## [v0.0.5] - 20.02.2023 00:28 MSK
+### Changed
+* Added config init flow via lib-config
+
+## [v0.0.6] - 21.03.2023 23:20 MSK
+### Changed
 * Encrypt/Decrypt helpers
 * Secrets loading flow
 * Add vault auth
@@ -9,15 +31,11 @@
   * token
   * userpass
   * kubernates
-### Changed
-* Lib-vault moved to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-vault
-* Added MIT license
 
-## [v0.0.2] - 09.05.2023 11:53 MSK
-### Changed
+## [v0.0.7] - 09.02.2024 15:41 MSK
+### Added
 * Added Vault helm-chart for local development. Chart cloned from [official Vault repository](https://github.com/hashicorp/vault-helm)
-
-## [v0.0.3] - 09.05.2023 11:53 MSK
 ### Changed
+* Changed config struct for support init with dependent base-config(from lib-config repo) service-component
 * Changed go-namespace
 * Changed README.md file-content - LICENSE section changed
