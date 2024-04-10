@@ -39,3 +39,10 @@
 * Changed config struct for support init with dependent base-config(from lib-config repo) service-component
 * Changed go-namespace
 * Changed README.md file-content - LICENSE section changed
+
+## [v0.0.8] - 10.02.2024
+### Changed
+* Changed vault service-component - removed data encryption flow
+  * Moved encryption flow to another service-component
+  * Changed ENV variables name
+* Changed README.md file-content - added "Data encryption" example block

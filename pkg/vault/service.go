@@ -19,16 +19,6 @@ const (
 	defaultAuthMethod = authMethodKubernetes
 )
 
-type Vaulter interface {
-	Encrypt(toEncrypt []byte) ([]byte, error)
-	Decrypt(cipherBytes []byte) ([]byte, error)
-
-	GetCredentialsBytes() (b []byte, err error)
-	GetCredentialsBytesByPath(path string) (b []byte, err error)
-	GetCredentialsByPathAndKey(path, field string) (string, error)
-	GetCredentialsByPathAndKeys(path string, fields ...string) (map[string]string, error)
-}
-
 type Service struct {
 	client    *vaultApi.Client
 	clientSvc clientService
@@ -135,6 +125,10 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	s.client = loggedInVaultClient
 
 	return s.client, nil
+}
+
+func (s *Service) GetClient() *vaultApi.Client {
+	return s.client
 }
 
 func NewService(ctx context.Context,

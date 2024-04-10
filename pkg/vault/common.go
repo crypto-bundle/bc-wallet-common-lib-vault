@@ -52,3 +52,13 @@ type baseApplicationConfigService interface {
 	GetEnvironmentName() string
 	GetStageName() string
 }
+
+type Vaulter interface {
+	Encrypt(toEncrypt []byte) ([]byte, error)
+	Decrypt(cipherBytes []byte) ([]byte, error)
+
+	GetCredentialsBytes() (b []byte, err error)
+	GetCredentialsBytesByPath(path string) (b []byte, err error)
+	GetCredentialsByPathAndKey(path, field string) (string, error)
+	GetCredentialsByPathAndKeys(path string, fields ...string) (map[string]string, error)
+}

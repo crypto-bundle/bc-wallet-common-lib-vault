@@ -47,33 +47,98 @@ func main() {
 		panic(err)
 	}
 
-	vaultClientSrv, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
+	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
 	if err != nil {
 		panic(err)
 	}
 
 	// vault prepare 
-	vaultSrv, err := commonVault.NewService(ctx, vaultCfg, vaultClientSrv)
+	vaultSvc, err := commonVault.NewService(ctx, vaultCfg, vaultClientSvc)
 	if err != nil {
 		panic(err)
 	}
 
-	_, err = vaultSrv.Login(ctx)
+	_, err = vaultSvc.Login(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	err = vaultSrv.LoadSecrets(ctx)
+	err = vaultSvc.LoadSecrets(ctx)
 	if err != nil {
 		panic(err)
 	}
 
-	data, isExists := vaultSrv.GetByName("key_name")
+	data, isExists := vaultSvc.GetByName("key_name")
 	if !isExists {
 		panic(errors.New("missing value"))
 	}
 
 	log.Printf("result: %s", data)
+
+	...
+}
+```
+
+### Data encryption
+
+```go
+package main
+
+import (
+	"context"
+	"errors"
+	"log"
+
+	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
+	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
+	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
+)
+
+type VaultWrappedConfig struct {
+	*commonVault.BaseConfig
+	*commonVaultTokenClient.AuthConfig
+}
+
+func main() {
+	ctx := context.Background()
+
+	cfgPreparerSrv := commonEnvConfig.NewConfigManager()
+	vaultCfg := &VaultWrappedConfig{
+		BaseConfig: &commonVault.BaseConfig{},
+		AuthConfig: &commonVaultTokenClient.AuthConfig{},
+	}
+	err := cfgPreparerSrv.PrepareTo(vaultCfg).With(baseCfgSrv).Do(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
+	if err != nil {
+		panic(err)
+	}
+
+	// vault prepare 
+	vaultSvc, err := commonVault.NewService(ctx, vaultCfg, vaultClientSvc)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = vaultSvc.Login(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	vaultCrypterSvc, err := commonVault.NewEncryptService(ctx, vaultSvc.GetClient())
+	if err != nil {
+		panic(err)
+	}
+
+	encryptedData, err := vaultCrypterSvc.Encrypt([]byte("Hello world"))
+	if err != nil {
+		panic(err)
+	}
+	
+	log.Printf("result: %s", encryptedData)
 
 	...
 }
