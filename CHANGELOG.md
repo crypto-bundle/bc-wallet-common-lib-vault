@@ -40,7 +40,7 @@
 * Changed go-namespace
 * Changed README.md file-content - LICENSE section changed
 
-## [v0.0.8] - 10.02.2024
+## [v0.0.8, v0.0.9] - 10.02.2024
 ### Changed
 * Changed vault service-component - removed data encryption flow
   * Moved encryption flow to another service-component
