@@ -28,6 +28,15 @@ type Service struct {
 	loadedSecrets map[string]string
 }
 
+func (s *Service) IsHealed(_ context.Context) bool {
+	status, err := s.client.Sys().Health()
+	if err != nil {
+		return false
+	}
+
+	return status.Standby && status.Sealed
+}
+
 // GetCredentialsBytes returns all secrets bytes from default path.
 func (s *Service) GetCredentialsBytes() (b []byte, err error) {
 	secret, err := s.client.Logical().Read(s.cfg.GetDataPath())
