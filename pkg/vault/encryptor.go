@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"context"
 	b64 "encoding/base64"
 	vaultApi "github.com/hashicorp/vault/api"
 )
@@ -15,6 +16,15 @@ const (
 type encryptor struct {
 	transitKey string
 	client     *vaultApi.Client
+}
+
+func (s *encryptor) IsHealed(_ context.Context) bool {
+	status, err := s.client.Sys().Health()
+	if err != nil {
+		return false
+	}
+
+	return status.Standby && status.Sealed
 }
 
 // Encrypt get encrypted ciphertext bytes via vault transit secret engine.

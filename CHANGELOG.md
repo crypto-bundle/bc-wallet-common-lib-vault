@@ -40,9 +40,13 @@
 * Changed go-namespace
 * Changed README.md file-content - LICENSE section changed
 
-## [v0.0.8, v0.0.9] - 10.02.2024
+## [v0.0.8, v0.0.9] - 10.04.2024
 ### Changed
 * Changed vault service-component - removed data encryption flow
   * Moved encryption flow to another service-component
   * Changed ENV variables name
 * Changed README.md file-content - added "Data encryption" example block
+
+## [v0.0.10] - 13.04.2024
+### Added
+* Added support of healthcheck flow, which required by [lib-healthcheck](https://github.com/crypto-bundle/bc-wallet-common-lib-healthcheck)
