@@ -3,8 +3,8 @@ package vault
 import "fmt"
 
 type BaseConfig struct {
-	Host       string `envconfig:"VAULT_HOST" default:"vault"`
-	Port       uint32 `envconfig:"VAULT_PORT" default:"8200"`
+	Host       string `envconfig:"VAULT_SERVICE_HOST" default:"vault"`
+	Port       uint32 `envconfig:"VAULT_SERVICE_PORT" default:"8200"`
 	UseHTTPS   bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
 	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
 
