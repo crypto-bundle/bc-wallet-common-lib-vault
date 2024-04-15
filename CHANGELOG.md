@@ -50,3 +50,10 @@
 ## [v0.0.11] - 13.04.2024
 ### Added
 * Added support of healthcheck flow, which required by [lib-healthcheck](https://github.com/crypto-bundle/bc-wallet-common-lib-healthcheck)
+
+## [v0.0.12] - 15.04.2024
+### Changed
+* Changed env variables name for supporting kubernetes naming standard:
+  * VAULT_HOST -> VAULT_SERVICE_HOST
+  * VAULT_PORT -> VAULT_SERVICE_PORT
+
