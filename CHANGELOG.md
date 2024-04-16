@@ -57,3 +57,6 @@
   * VAULT_HOST -> VAULT_SERVICE_HOST
   * VAULT_PORT -> VAULT_SERVICE_PORT
 
+## [v0.0.13] - 16.04.2024
+### Changed
+* Bump golang version 1.19 -> 1.22
