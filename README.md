@@ -86,7 +86,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"

@@ -60,3 +60,7 @@
 ## [v0.0.13] - 16.04.2024
 ### Changed
 * Bump golang version 1.19 -> 1.22
+* 
+## [v0.0.14] - 05.05.2024
+### Changed
+* Bump vault dependencies version
