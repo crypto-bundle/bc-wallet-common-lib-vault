@@ -1,5 +1,9 @@
 # Change Log
 
+## [v0.0.16] - 18.06.2024
+### Added
+* Added token renewal flow
+
 ## [v0.0.15] - 17.06.2024
 ### Added
 * Added new environment variable VAULT_AUTH_TOKEN_FILE_PATH

@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
 )
@@ -34,7 +35,22 @@ func (s *Service) IsHealed(_ context.Context) bool {
 		return false
 	}
 
-	return status.Standby && status.Sealed
+	serverOk := status.Standby && status.Sealed
+	if !serverOk {
+		return false
+	}
+
+	secretData, err := s.client.Auth().Token().LookupSelf()
+	if err != nil {
+		return false
+	}
+
+	currentTime := time.Now()
+	if currentTime.Unix() > int64(secretData.LeaseDuration) {
+		return false
+	}
+
+	return true
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
@@ -132,6 +148,8 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	}
 
 	s.client = loggedInVaultClient
+
+	s.tokenRenew(ctx)
 
 	return s.client, nil
 }

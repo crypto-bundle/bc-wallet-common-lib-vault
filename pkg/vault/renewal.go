@@ -17,7 +17,7 @@ const (
 
 func (s *Service) tokenRenew(ctx context.Context) {
 	for {
-		renewed, err := s.renew(ctx, s.authInfo)
+		renewed, err := s.renew(ctx)
 		if err != nil {
 			log.Fatalf("vault token renew error: %v", err)
 		}
@@ -36,9 +36,16 @@ func (s *Service) tokenRenew(ctx context.Context) {
 	}
 }
 
-func (s *Service) renew(ctx context.Context, authToken *vault.Secret) (renewResult, error) {
+func (s *Service) renew(ctx context.Context) (renewResult, error) {
+	tokenSecret, err := s.client.Auth().Token().LookupSelf()
+	if err != nil {
+		return renewError, NewInternalError(ErrUnableGetTokenInfo, err)
+	}
+
+	s.authInfo = tokenSecret
+
 	authTokenWatcher, err := s.client.NewLifetimeWatcher(&vault.LifetimeWatcherInput{
-		Secret: authToken,
+		Secret: s.authInfo,
 	})
 	if err != nil {
 		return renewError, NewInternalError(ErrInitTokenTTLWatcher, err)
@@ -54,7 +61,10 @@ func (s *Service) renew(ctx context.Context, authToken *vault.Secret) (renewResu
 		case doneErr := <-authTokenWatcher.DoneCh():
 			return expiringAuthToken, doneErr
 		case info := <-authTokenWatcher.RenewCh():
-			log.Printf("auth token: successfully renewed; remaining duration: %ds", info.Secret.Auth.LeaseDuration)
+			s.authInfo = info.Secret
+
+			log.Printf("auth token: successfully renewed; remaining duration: %ds",
+				info.Secret.Auth.LeaseDuration)
 		}
 	}
 }

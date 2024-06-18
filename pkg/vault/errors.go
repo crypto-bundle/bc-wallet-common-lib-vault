@@ -23,6 +23,7 @@ const (
 	ErrKeyType             InternalError = "unexpected key type in secret"
 	ErrTransitSecretFormat InternalError = "unexpected format for transit secret"
 	ErrInitTokenTTLWatcher InternalError = "unable to initialize auth token lifetime watcher"
+	ErrUnableGetTokenInfo  InternalError = "unable to get token info"
 	ErrEmptyConfig         InternalError = "config is empty"
 )
 
