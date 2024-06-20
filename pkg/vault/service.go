@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log"
-	"sync"
 	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
@@ -153,14 +152,7 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	s.client = loggedInVaultClient
 
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		err = s.tokenRenew(ctx)
-		wg.Done()
-	}()
-	wg.Wait()
-
+	err = s.prepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, err
 	}

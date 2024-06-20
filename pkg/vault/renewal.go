@@ -3,6 +3,7 @@ package vault
 import (
 	"context"
 	vault "github.com/hashicorp/vault/api"
+	"sync"
 	"time"
 )
 
@@ -14,20 +15,44 @@ const (
 	expiringAuthToken
 )
 
-func (s *Service) tokenRenew(ctx context.Context) error {
+func (s *Service) prepareRenew(ctx context.Context) error {
+	token := s.client.Auth().Token()
+
+	secret, loopErr := token.RenewSelf(s.cfg.GetTokenRenewTTL())
+	if loopErr != nil {
+		s.logger.Printf("vault token renew error: %v", loopErr)
+
+		return NewInternalError(ErrUnableGetTokenInfo, loopErr)
+	}
+
+	s.authInfo = secret
+
+	return nil
+}
+
+func (s *Service) prepareAndStartRenew(ctx context.Context) error {
+	err := s.prepareRenew(ctx)
+	if err != nil {
+		return err
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = s.startRenew(ctx, wg)
+	}()
+	wg.Wait()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) startRenew(ctx context.Context, wg *sync.WaitGroup) error {
 	for {
-		token := s.client.Auth().Token()
-
-		secret, loopErr := token.RenewSelf(s.cfg.GetTokenRenewTTL())
-		if loopErr != nil {
-			s.logger.Printf("vault token renew error: %v", loopErr)
-
-			return NewInternalError(ErrUnableGetTokenInfo, loopErr)
-		}
-
-		s.authInfo = secret
-
-		renewed, loopErr := s.renew(ctx)
+		renewed, loopErr := s.renew(ctx, wg)
 		if loopErr != nil {
 			s.logger.Printf("vault token renew error: %v", loopErr)
 		}
@@ -50,7 +75,7 @@ func (s *Service) tokenRenew(ctx context.Context) error {
 	}
 }
 
-func (s *Service) renew(ctx context.Context) (renewResult, error) {
+func (s *Service) renew(ctx context.Context, wg *sync.WaitGroup) (renewResult, error) {
 	authTokenWatcher, err := s.client.NewLifetimeWatcher(&vault.LifetimeWatcherInput{
 		Secret: s.authInfo,
 		//Increment: s.cfg.GetTokenRenewTTL(),
@@ -61,6 +86,8 @@ func (s *Service) renew(ctx context.Context) (renewResult, error) {
 
 	go authTokenWatcher.Start()
 	defer authTokenWatcher.Stop()
+
+	wg.Done()
 
 	for {
 		select {
