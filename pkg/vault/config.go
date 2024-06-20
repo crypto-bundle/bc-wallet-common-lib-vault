@@ -8,6 +8,8 @@ type BaseConfig struct {
 	UseHTTPS   bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
 	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
 
+	TokenRenewTTL int `envconfig:"VAULT_TOKEN_RENEW_TTL" default:"240"`
+
 	DataPath string `envconfig:"VAULT_APP_DATA_PATH" default:""`
 
 	// dependencies
@@ -40,6 +42,10 @@ func (c *BaseConfig) GetDataPath() string {
 
 func (c *BaseConfig) GetAuthMethod() string {
 	return c.AuthMethod
+}
+
+func (c *BaseConfig) GetTokenRenewTTL() int {
+	return c.TokenRenewTTL
 }
 
 func (c *BaseConfig) GetApplicationStageName() string {

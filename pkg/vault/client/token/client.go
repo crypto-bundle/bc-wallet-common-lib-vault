@@ -16,7 +16,7 @@ func (s *service) GetClient() *vaultApi.Client {
 	return s.client
 }
 
-func (s *service) Login(_ context.Context) (*vaultApi.Client, error) {
+func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	return s.client, nil
 }
 

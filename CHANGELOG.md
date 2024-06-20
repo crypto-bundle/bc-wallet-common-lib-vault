@@ -1,8 +1,9 @@
 # Change Log
 
-## [v0.0.16] - 18.06.2024
+## [v0.0.16] - 21.06.2024
 ### Added
 * Added token renewal flow
+* Added logger dependency
 
 ## [v0.0.15] - 17.06.2024
 ### Added

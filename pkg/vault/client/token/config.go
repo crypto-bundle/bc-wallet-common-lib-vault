@@ -3,6 +3,7 @@ package token
 import (
 	"errors"
 	"os"
+	"strings"
 )
 
 var (
@@ -32,7 +33,7 @@ func (c *AuthConfig) Prepare() error {
 		return err
 	}
 
-	c.AuthToken = string(fileContent)
+	c.AuthToken = strings.TrimRight(string(fileContent), "\n")
 
 	return nil
 }

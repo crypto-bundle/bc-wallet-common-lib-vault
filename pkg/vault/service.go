@@ -3,6 +3,8 @@ package vault
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"sync"
 	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
@@ -21,6 +23,8 @@ const (
 )
 
 type Service struct {
+	logger *log.Logger
+
 	client    *vaultApi.Client
 	clientSvc clientService
 	authInfo  *vaultApi.Secret
@@ -149,7 +153,17 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	s.client = loggedInVaultClient
 
-	s.tokenRenew(ctx)
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		err = s.tokenRenew(ctx)
+		wg.Done()
+	}()
+	wg.Wait()
+
+	if err != nil {
+		return nil, err
+	}
 
 	return s.client, nil
 }
@@ -158,13 +172,17 @@ func (s *Service) GetClient() *vaultApi.Client {
 	return s.client
 }
 
-func NewService(ctx context.Context,
+func NewService(
+	logger *log.Logger,
 	cfg configService,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		clientSvc:     client,
-		cfg:           cfg,
-		loadedSecrets: make(map[string]string, 0),
+		logger: logger,
+
+		clientSvc: client,
+		cfg:       cfg,
+
+		loadedSecrets: make(map[string]string),
 	}, nil
 }

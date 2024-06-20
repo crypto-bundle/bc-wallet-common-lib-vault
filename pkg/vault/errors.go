@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	ErrConfigIsNotValid = errors.New("config is not valid.some fields is missing")
+	ErrConfigIsNotValid = errors.New("config is not valid.some fields are missing")
 )
 
 const (
@@ -35,10 +35,10 @@ func (e InternalError) Error() string {
 
 // WithMsg returns internal error with additional text.
 func (e InternalError) WithMsg(msg string) error {
-	return fmt.Errorf("%s: %s", e.Error(), msg)
+	return fmt.Errorf("%w: %s", e, msg)
 }
 
 // NewInternalError returns new error.
 func NewInternalError(vErr InternalError, err error) error {
-	return fmt.Errorf("%s: %q", vErr, err)
+	return fmt.Errorf("%w: %q", vErr, err)
 }

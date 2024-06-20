@@ -13,6 +13,7 @@ type configService interface {
 	IsUseHTTPS() bool
 	GetAuthMethod() string
 	GetDataPath() string
+	GetTokenRenewTTL() int
 	// --------------------------------------------
 	// Token auth config methods
 	// --------------------------------------------
