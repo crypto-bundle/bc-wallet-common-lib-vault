@@ -3,6 +3,8 @@ package vault
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
 )
@@ -20,21 +22,44 @@ const (
 )
 
 type Service struct {
-	client    *vaultApi.Client
-	clientSvc clientService
-	authInfo  *vaultApi.Secret
-	cfg       configService
+	logger *log.Logger
+
+	client     *vaultApi.Client
+	clientSvc  clientService
+	renewerSvc renewerService
+	authInfo   *vaultApi.Secret
+	cfg        configService
 
 	loadedSecrets map[string]string
 }
 
-func (s *Service) IsHealed(_ context.Context) bool {
+func (s *Service) IsHealed(ctx context.Context) bool {
 	status, err := s.client.Sys().Health()
 	if err != nil {
 		return false
 	}
 
-	return status.Standby && status.Sealed
+	serverOk := status.Standby && status.Sealed
+	if !serverOk {
+		return false
+	}
+
+	isHealed := s.renewerSvc.IsHealed(ctx)
+	if !isHealed {
+		return isHealed
+	}
+
+	secretData, err := s.client.Auth().Token().LookupSelf()
+	if err != nil {
+		return false
+	}
+
+	currentTime := time.Now()
+	if currentTime.Unix() > int64(secretData.LeaseDuration) {
+		return false
+	}
+
+	return true
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
@@ -133,6 +158,15 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	s.client = loggedInVaultClient
 
+	renewSvc := newRenewer(s.logger, s.clientSvc, s.cfg.GetTokenRenewTTL())
+
+	err = renewSvc.PrepareAndStartRenew(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	s.renewerSvc = renewSvc
+
 	return s.client, nil
 }
 
@@ -140,13 +174,17 @@ func (s *Service) GetClient() *vaultApi.Client {
 	return s.client
 }
 
-func NewService(ctx context.Context,
+func NewService(
+	logger *log.Logger,
 	cfg configService,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		clientSvc:     client,
-		cfg:           cfg,
-		loadedSecrets: make(map[string]string, 0),
+		logger: logger,
+
+		clientSvc: client,
+		cfg:       cfg,
+
+		loadedSecrets: make(map[string]string),
 	}, nil
 }

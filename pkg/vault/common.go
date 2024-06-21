@@ -13,6 +13,7 @@ type configService interface {
 	IsUseHTTPS() bool
 	GetAuthMethod() string
 	GetDataPath() string
+	GetTokenRenewTTL() int
 	// --------------------------------------------
 	// Token auth config methods
 	// --------------------------------------------
@@ -45,6 +46,11 @@ type configService interface {
 type clientService interface {
 	GetClient() *vaultApi.Client
 	Login(context.Context) (*vaultApi.Client, error)
+}
+
+type renewerService interface {
+	IsHealed(_ context.Context) bool
+	PrepareAndStartRenew(ctx context.Context) error
 }
 
 type baseApplicationConfigService interface {
