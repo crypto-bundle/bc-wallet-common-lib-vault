@@ -48,6 +48,11 @@ type clientService interface {
 	Login(context.Context) (*vaultApi.Client, error)
 }
 
+type renewerService interface {
+	IsHealed(_ context.Context) bool
+	PrepareAndStartRenew(ctx context.Context) error
+}
+
 type baseApplicationConfigService interface {
 	GetEnvironmentName() string
 	GetStageName() string

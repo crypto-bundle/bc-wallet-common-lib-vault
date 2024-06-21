@@ -24,15 +24,16 @@ const (
 type Service struct {
 	logger *log.Logger
 
-	client    *vaultApi.Client
-	clientSvc clientService
-	authInfo  *vaultApi.Secret
-	cfg       configService
+	client     *vaultApi.Client
+	clientSvc  clientService
+	renewerSvc renewerService
+	authInfo   *vaultApi.Secret
+	cfg        configService
 
 	loadedSecrets map[string]string
 }
 
-func (s *Service) IsHealed(_ context.Context) bool {
+func (s *Service) IsHealed(ctx context.Context) bool {
 	status, err := s.client.Sys().Health()
 	if err != nil {
 		return false
@@ -41,6 +42,11 @@ func (s *Service) IsHealed(_ context.Context) bool {
 	serverOk := status.Standby && status.Sealed
 	if !serverOk {
 		return false
+	}
+
+	isHealed := s.renewerSvc.IsHealed(ctx)
+	if !isHealed {
+		return isHealed
 	}
 
 	secretData, err := s.client.Auth().Token().LookupSelf()
@@ -152,10 +158,14 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	s.client = loggedInVaultClient
 
-	err = s.prepareAndStartRenew(ctx)
+	renewSvc := newRenewer(s.logger, s.clientSvc, s.cfg.GetTokenRenewTTL())
+
+	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	s.renewerSvc = renewSvc
 
 	return s.client, nil
 }
