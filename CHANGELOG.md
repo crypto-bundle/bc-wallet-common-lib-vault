@@ -1,8 +1,9 @@
 # Change Log
 
-## [v0.0.16] - 21.06.2024
+## [v0.0.16, v0.0.17] - 21.06.2024
 ### Added
 * Added token renewal flow
+  * Added VAULT_AUTH_TOKEN_RENEW_TTL environment variable - value in seconds of increment token expiration time. Zero value disable renewal flow.
 * Added logger dependency
 
 ## [v0.0.15] - 17.06.2024
