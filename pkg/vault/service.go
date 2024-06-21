@@ -158,8 +158,12 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	s.client = loggedInVaultClient
 
-	renewSvc := newRenewer(s.logger, s.clientSvc, s.cfg.GetTokenRenewTTL())
+	renewTTL := s.cfg.GetTokenRenewTTL()
+	if renewTTL == 0 {
+		return s.client, nil
+	}
 
+	renewSvc := newRenewer(s.logger, s.clientSvc, renewTTL)
 	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, err

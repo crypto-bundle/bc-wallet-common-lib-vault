@@ -8,7 +8,9 @@ type BaseConfig struct {
 	UseHTTPS   bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
 	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
 
-	TokenRenewTTL int `envconfig:"VAULT_TOKEN_RENEW_TTL" default:"240"`
+	// TokenRenewTTL - value in seconds of increment token expiration time.
+	// If you want to disable renewal flow - you can set zero value
+	TokenRenewTTL int `envconfig:"VAULT_AUTH_TOKEN_RENEW_TTL" default:"240"`
 
 	DataPath string `envconfig:"VAULT_APP_DATA_PATH" default:""`
 
