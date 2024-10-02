@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"os"
 	"os/signal"
@@ -10,6 +11,53 @@ import (
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
+
+type errFmt struct {
+}
+
+func (f *errFmt) ErrorWithCode(_ error, _ int) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) ErrWithCode(_ error, _ int) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) ErrorGetCode(_ error) int {
+	return -1
+}
+
+func (f *errFmt) ErrGetCode(_ error) int {
+	return -1
+}
+
+func (f *errFmt) ErrorNoWrap(_ error) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) ErrNoWrap(_ error) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) ErrorOnly(_ error, _ ...string) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) Error(_ error, _ ...string) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) Errorf(_ error, _ string, _ ...interface{}) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) NewError(_ ...string) error {
+	return errors.New("mock_err_formatter")
+}
+
+func (f *errFmt) NewErrorf(_ string, _ ...interface{}) error {
+	return errors.New("mock_err_formatter")
+}
 
 func main() {
 	type VaultWrappedConfig struct {
@@ -37,14 +85,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	mockErrFmtSvc := &errFmt{}
 	ctx, cancelCtxFunc := context.WithCancel(context.Background())
 
-	vaultClientSrv, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
+	vaultClientSrv, err := commonVaultTokenClient.NewClient(ctx, mockErrFmtSvc, vaultCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	vaultSrv, err := commonVault.NewService(log.Default(), vaultCfg, vaultClientSrv)
+	vaultSrv, err := commonVault.NewService(log.Default(), mockErrFmtSvc, vaultCfg, vaultClientSrv)
 	if err != nil {
 		log.Fatal(err)
 	}

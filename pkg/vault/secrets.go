@@ -3,13 +3,13 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 )
 
-const vaultVarPrefixDelimiter = "-" // delimiter between vault variable name and the prefix
-
-const vaultDataPathDelimiter = "," // vault DataPath env variable can be a list of paths, separated by delimiter
+const (
+	vaultVarPrefixDelimiter = "-" // delimiter between vault variable name and the prefix
+	vaultDataPathDelimiter  = "," // vault DataPath env variable can be a list of paths, separated by delimiter
+)
 
 func (s *Service) GetByName(keyName string) (data string, isExists bool) {
 	secretData, isExists := s.loadedSecrets[keyName]
@@ -35,13 +35,13 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 
 		b, err := s.GetCredentialsBytesByPath(path)
 		if err != nil {
-			return fmt.Errorf("get bytes from path %s: %w", path, err)
+			return s.e.ErrorNoWrap(err)
 		}
 
 		vars := make(map[string]string)
 		err = json.Unmarshal(b, &vars)
 		if err != nil {
-			return fmt.Errorf("unmarshal path from %s: %w", path, err)
+			return s.e.ErrorOnly(err)
 		}
 
 		currentVars := make(map[string]string)
