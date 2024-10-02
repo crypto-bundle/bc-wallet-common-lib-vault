@@ -14,6 +14,8 @@ const (
 )
 
 type encryptor struct {
+	e errorFormatterService
+
 	transitKey string
 	client     *vaultApi.Client
 }
@@ -36,13 +38,13 @@ func (s *encryptor) Encrypt(toEncrypt []byte) ([]byte, error) {
 		plainTxt: b64Val,
 	})
 	if err != nil {
-		return nil, err
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	encrVal := secret.Data[cipherTxt]
 	encrValStr, ok := encrVal.(string)
 	if !ok {
-		return nil, ErrTransitSecretFormat
+		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
 	}
 
 	return []byte(encrValStr), nil
@@ -56,22 +58,25 @@ func (s *encryptor) Decrypt(cipherBytes []byte) ([]byte, error) {
 		cipherTxt: string(cipherBytes),
 	})
 	if err != nil {
-		return nil, err
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	decrVal := secret.Data[plainTxt]
 	decrValStr, ok := decrVal.(string)
 	if !ok {
-		return nil, ErrTransitSecretFormat
+		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
 	}
 
 	return b64.StdEncoding.DecodeString(decrValStr)
 }
 
-func NewEncryptService(client clientService,
+func NewEncryptService(errFmtSvc errorFormatterService,
+	client clientService,
 	transitKey string,
 ) *encryptor {
 	return &encryptor{
+		e: errFmtSvc,
+
 		transitKey: transitKey,
 		client:     client.GetClient(),
 	}

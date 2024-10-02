@@ -17,7 +17,8 @@ const (
 )
 
 type renewer struct {
-	logger *log.Logger
+	l *log.Logger
+	e errorFormatterService
 
 	client     clientService
 	defaultTTL int
@@ -47,14 +48,14 @@ func (s *renewer) IsHealed(_ context.Context) bool {
 	return true
 }
 
-func (s *renewer) prepareRenew(ctx context.Context) error {
+func (s *renewer) prepareRenew(_ context.Context) error {
 	token := s.client.GetClient().Auth().Token()
 
 	secret, loopErr := token.RenewSelf(s.defaultTTL)
 	if loopErr != nil {
-		s.logger.Printf("vault token renew error: %v", loopErr)
+		s.l.Printf("vault token renew error: %v", loopErr)
 
-		return NewInternalError(ErrUnableGetTokenInfo, loopErr)
+		return s.e.ErrorOnly(loopErr, ErrUnableGetTokenInfoDetail)
 	}
 
 	s.currentSecret = secret
@@ -65,7 +66,7 @@ func (s *renewer) prepareRenew(ctx context.Context) error {
 func (s *renewer) PrepareAndStartRenew(ctx context.Context) error {
 	err := s.prepareRenew(ctx)
 	if err != nil {
-		return err
+		return s.e.ErrorNoWrap(err)
 	}
 
 	wg := &sync.WaitGroup{}
@@ -78,7 +79,7 @@ func (s *renewer) PrepareAndStartRenew(ctx context.Context) error {
 	wg.Wait()
 
 	if err != nil {
-		return err
+		return s.e.ErrorNoWrap(err)
 	}
 
 	return nil
@@ -88,7 +89,7 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) error {
 	for {
 		renewed, loopErr := s.renew(ctx, renewClb)
 		if loopErr != nil {
-			s.logger.Printf("vault token renew error: %v", loopErr)
+			s.l.Printf("vault token renew error: %v", loopErr)
 		}
 
 		if renewed&exitRequested != 0 {
@@ -98,10 +99,10 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) error {
 		if renewed&expiringAuthToken != 0 {
 			_, loginErr := s.client.Login(ctx)
 			if loginErr != nil {
-				s.logger.Printf("login authentication error: %v", loginErr)
+				s.l.Printf("login authentication error: %v", loginErr)
 			}
 
-			s.logger.Printf("reconnect and renew")
+			s.l.Printf("reconnect and renew")
 		}
 	}
 }
@@ -111,7 +112,7 @@ func (s *renewer) renew(ctx context.Context, renewClb func()) (renewResult, erro
 		Secret: s.currentSecret,
 	})
 	if err != nil {
-		return renewError, NewInternalError(ErrInitTokenTTLWatcher, err)
+		return renewError, s.e.ErrorOnly(err, ErrInitTokenTTLWatcherDetail)
 	}
 
 	go authTokenWatcher.Start()
@@ -125,26 +126,29 @@ func (s *renewer) renew(ctx context.Context, renewClb func()) (renewResult, erro
 			return exitRequested, nil
 
 		case doneErr, isClosed := <-authTokenWatcher.DoneCh():
-			s.logger.Printf("auth token: done with err: %s and chan is closed: %t",
+			s.l.Printf("auth token: done with err: %s and chan is closed: %t",
 				doneErr, isClosed)
 
-			return expiringAuthToken, doneErr
+			return expiringAuthToken, s.e.ErrorNoWrap(doneErr)
 
 		case info := <-authTokenWatcher.RenewCh():
 			s.currentSecret = info.Secret
 
-			s.logger.Printf("auth token: successfully renewed; remaining duration: %ds",
+			s.l.Printf("auth token: successfully renewed; remaining duration: %ds",
 				info.Secret.Auth.LeaseDuration)
 		}
 	}
 }
 
 func newRenewer(logger *log.Logger,
+	errFmtSvc errorFormatterService,
 	clientSvc clientService,
 	defaultTTL int,
 ) *renewer {
 	return &renewer{
-		logger:        logger,
+		l: logger,
+		e: errFmtSvc,
+
 		client:        clientSvc,
 		defaultTTL:    defaultTTL,
 		currentSecret: nil,

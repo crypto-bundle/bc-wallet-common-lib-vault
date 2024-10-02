@@ -22,7 +22,8 @@ const (
 )
 
 type Service struct {
-	logger *log.Logger
+	l *log.Logger
+	e errorFormatterService
 
 	client     *vaultApi.Client
 	clientSvc  clientService
@@ -66,10 +67,10 @@ func (s *Service) IsHealed(ctx context.Context) bool {
 func (s *Service) GetCredentialsBytes() (b []byte, err error) {
 	secret, err := s.client.Logical().Read(s.cfg.GetDataPath())
 	if err != nil {
-		return nil, NewInternalError(ErrReadSecret, err)
+		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
 	if secret == nil {
-		return nil, ErrEmptySecret
+		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
 	return json.Marshal(secret.Data["data"])
@@ -79,10 +80,10 @@ func (s *Service) GetCredentialsBytes() (b []byte, err error) {
 func (s *Service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
-		return nil, NewInternalError(ErrReadSecret, err)
+		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
 	if secret == nil {
-		return nil, ErrEmptySecret
+		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
 	return json.Marshal(secret.Data["data"])
@@ -92,25 +93,25 @@ func (s *Service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
 func (s *Service) GetCredentialsByPathAndKey(path, key string) (string, error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
-		return "", NewInternalError(ErrReadSecret, err)
+		return "", s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
 	if secret == nil {
-		return "", ErrEmptySecret
+		return "", s.e.ErrorOnly(ErrEmptySecret)
 	}
 
 	data, ok := secret.Data["data"].(map[string]interface{})
 	if !ok {
-		return "", ErrCastSecret
+		return "", s.e.ErrorOnly(ErrCastSecret)
 	}
 
 	keyVal, ok := data[key]
 	if !ok {
-		return "", ErrNotExistingKey.WithMsg(key)
+		return "", s.e.ErrorOnly(ErrNotExistingKey, key)
 	}
 
 	keyString, ok := keyVal.(string)
 	if !ok {
-		return "", ErrKeyType.WithMsg(key)
+		return "", s.e.ErrorOnly(ErrKeyType, key)
 	}
 
 	return keyString, nil
@@ -122,26 +123,26 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
-		return nil, NewInternalError(ErrReadSecret, err)
+		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
 	if secret == nil {
-		return nil, ErrEmptySecret
+		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
 	data, ok := secret.Data["data"].(map[string]interface{})
 	if !ok {
-		return nil, ErrCastSecret
+		return nil, s.e.ErrorOnly(ErrCastSecret)
 	}
 
 	for _, k := range keys {
 		keyVal, isExists := data[k]
 		if !isExists {
-			return res, ErrNotExistingKey.WithMsg(k)
+			return res, s.e.ErrorOnly(ErrNotExistingKey, k)
 		}
 
 		keyString, isExists := keyVal.(string)
 		if !isExists {
-			return res, ErrKeyType.WithMsg(k)
+			return res, s.e.ErrorOnly(ErrKeyType, k)
 		}
 
 		res[k] = keyString
@@ -153,7 +154,7 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	loggedInVaultClient, err := s.clientSvc.Login(ctx)
 	if err != nil {
-		return nil, err
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	s.client = loggedInVaultClient
@@ -163,10 +164,11 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 		return s.client, nil
 	}
 
-	renewSvc := newRenewer(s.logger, s.clientSvc, renewTTL)
+	renewSvc := newRenewer(s.l, s.e,
+		s.clientSvc, renewTTL)
 	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
-		return nil, err
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	s.renewerSvc = renewSvc
@@ -180,11 +182,13 @@ func (s *Service) GetClient() *vaultApi.Client {
 
 func NewService(
 	logger *log.Logger,
+	errFmtSvc errorFormatterService,
 	cfg configService,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		logger: logger,
+		l: logger,
+		e: errFmtSvc,
 
 		clientSvc: client,
 		cfg:       cfg,

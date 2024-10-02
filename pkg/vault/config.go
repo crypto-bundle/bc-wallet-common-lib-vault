@@ -16,6 +16,7 @@ type BaseConfig struct {
 
 	// dependencies
 	baseAppCfgSrv baseApplicationConfigService
+	e             errorFormatterService
 }
 
 func (c *BaseConfig) GetAddress() string {
@@ -23,6 +24,7 @@ func (c *BaseConfig) GetAddress() string {
 	if c.UseHTTPS {
 		protocol = "https"
 	}
+
 	return fmt.Sprintf("%s://%s:%d", protocol, c.Host, c.Port)
 }
 
@@ -64,9 +66,11 @@ func (c *BaseConfig) Prepare() error {
 
 func (c *BaseConfig) PrepareWith(dependentCfgList ...interface{}) error {
 	for _, cfgSrv := range dependentCfgList {
-		switch castedCfg := cfgSrv.(type) {
+		switch castedDep := cfgSrv.(type) {
 		case baseApplicationConfigService:
-			c.baseAppCfgSrv = castedCfg
+			c.baseAppCfgSrv = castedDep
+		case errorFormatterService:
+			c.e = castedDep
 		default:
 			continue
 		}
