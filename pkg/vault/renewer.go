@@ -141,11 +141,14 @@ func (s *renewer) renew(ctx context.Context, renewClb func()) (renewResult, erro
 }
 
 func newRenewer(logger *log.Logger,
+	errFmtSvc errorFormatterService,
 	clientSvc clientService,
 	defaultTTL int,
 ) *renewer {
 	return &renewer{
-		l:             logger,
+		l: logger,
+		e: errFmtSvc,
+
 		client:        clientSvc,
 		defaultTTL:    defaultTTL,
 		currentSecret: nil,

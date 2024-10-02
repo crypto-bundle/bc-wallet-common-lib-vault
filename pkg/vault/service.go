@@ -164,7 +164,8 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 		return s.client, nil
 	}
 
-	renewSvc := newRenewer(s.l, s.clientSvc, renewTTL)
+	renewSvc := newRenewer(s.l, s.e,
+		s.clientSvc, renewTTL)
 	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err)
