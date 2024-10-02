@@ -25,6 +25,7 @@ import (
 	"log"
 
 	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
+	commonErr "github.com/crypto-bundle/bc-wallet-common-lib-errors/pkg/errformatter"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
@@ -52,8 +53,10 @@ func main() {
 		panic(err)
 	}
 
+	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
+
 	// vault prepare 
-	vaultSvc, err := commonVault.NewService(ctx, vaultCfg, vaultClientSvc)
+	vaultSvc, err := commonVault.NewService(ctx, errFmtSvc, vaultCfg, vaultClientSvc)
 	if err != nil {
 		panic(err)
 	}
@@ -89,6 +92,7 @@ import (
 	"log"
 
 	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
+	commonErr "github.com/crypto-bundle/bc-wallet-common-lib-errors/pkg/errformatter"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
@@ -116,8 +120,10 @@ func main() {
 		panic(err)
 	}
 
+	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
+
 	// vault prepare 
-	vaultSvc, err := commonVault.NewService(ctx, vaultCfg, vaultClientSvc)
+	vaultSvc, err := commonVault.NewService(ctx, errFmtSvc, vaultCfg, vaultClientSvc)
 	if err != nil {
 		panic(err)
 	}
@@ -127,10 +133,7 @@ func main() {
 		panic(err)
 	}
 
-	vaultCrypterSvc, err := commonVault.NewEncryptService(ctx, vaultSvc.GetClient())
-	if err != nil {
-		panic(err)
-	}
+	vaultCrypterSvc := commonVault.NewEncryptService(errFmtSvc, vaultSvc.GetClient(), "transit_key_name")
 
 	encryptedData, err := vaultCrypterSvc.Encrypt([]byte("Hello world"))
 	if err != nil {
