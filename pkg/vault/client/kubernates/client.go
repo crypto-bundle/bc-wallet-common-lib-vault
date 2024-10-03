@@ -28,6 +28,7 @@ func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if authInfo == nil {
 		return nil, ErrEmptySecret
 	}
@@ -57,9 +58,10 @@ func NewClient(_ context.Context, cfg configService) (*service, error) {
 	}
 
 	vaultSvc := &service{
-		client:  client,
-		cfg:     cfg,
-		k8sAuth: auth,
+		client:      client,
+		cfg:         cfg,
+		k8sAuth:     auth,
+		vaultConfig: nil,
 	}
 
 	return vaultSvc, nil

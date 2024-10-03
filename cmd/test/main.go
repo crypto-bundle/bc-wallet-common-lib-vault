@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -16,11 +16,11 @@ type errFmt struct {
 }
 
 func (f *errFmt) ErrorWithCode(_ error, _ int) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) ErrWithCode(_ error, _ int) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) ErrorGetCode(_ error) int {
@@ -32,31 +32,31 @@ func (f *errFmt) ErrGetCode(_ error) int {
 }
 
 func (f *errFmt) ErrorNoWrap(_ error) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) ErrNoWrap(_ error) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) ErrorOnly(_ error, _ ...string) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) Error(_ error, _ ...string) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) Errorf(_ error, _ string, _ ...interface{}) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) NewError(_ ...string) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func (f *errFmt) NewErrorf(_ string, _ ...interface{}) error {
-	return errors.New("mock_err_formatter")
+	return fmt.Errorf("mock_err_formatter")
 }
 
 func main() {
@@ -102,11 +102,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//err = vaultSrv.LoadSecrets(ctx)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)

@@ -20,10 +20,10 @@ type renewer struct {
 	l *log.Logger
 	e errorFormatterService
 
-	client     clientService
-	defaultTTL int
-
+	client        clientService
 	currentSecret *vaultApi.Secret
+
+	defaultTTL int
 }
 
 func (s *renewer) IsHealed(_ context.Context) bool {
@@ -71,11 +71,13 @@ func (s *renewer) PrepareAndStartRenew(ctx context.Context) error {
 
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
+
 	go func() {
 		err = s.startRenew(ctx, sync.OnceFunc(func() {
 			wg.Done()
 		}))
 	}()
+
 	wg.Wait()
 
 	if err != nil {

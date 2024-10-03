@@ -11,7 +11,7 @@ const (
 	vaultDataPathDelimiter  = "," // vault DataPath env variable can be a list of paths, separated by delimiter
 )
 
-func (s *Service) GetByName(keyName string) (data string, isExists bool) {
+func (s *Service) GetByName(keyName string) (string, bool) {
 	secretData, isExists := s.loadedSecrets[keyName]
 	if !isExists {
 		return "", false
@@ -39,6 +39,7 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 		}
 
 		vars := make(map[string]string)
+
 		err = json.Unmarshal(b, &vars)
 		if err != nil {
 			return s.e.ErrorOnly(err)

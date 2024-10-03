@@ -18,26 +18,26 @@ type configService interface {
 	// Token auth config methods
 	// --------------------------------------------
 
-	//GetAuthToken() string
+	// GetAuthToken() string
 	// --------------------------------------------
 	// Github token auth config methods
 	// --------------------------------------------
 
-	//GetGithubAuthPath() string
-	//GetGithubAuthToken() string
+	// GetGithubAuthPath() string
+	// GetGithubAuthToken() string
 	// --------------------------------------------
 	// User and password auth config methods
 
-	//GetUserName() string
-	//GetUserPassword() string
+	// GetUserName() string
+	// GetUserPassword() string
 
 	// --------------------------------------------
 	// Kubernates config methods
 	// --------------------------------------------
 
-	//GetKubernatesAppRole() string
-	//GetKubernatesSATokenPath() string
-	//GetKubernatesAuthPath() string
+	// GetKubernatesAppRole() string
+	// GetKubernatesSATokenPath() string
+	// GetKubernatesAuthPath() string
 
 	GetApplicationStageName() string
 	GetApplicationEnvironment() string
@@ -45,7 +45,7 @@ type configService interface {
 
 type clientService interface {
 	GetClient() *vaultApi.Client
-	Login(context.Context) (*vaultApi.Client, error)
+	Login(ctx context.Context) (*vaultApi.Client, error)
 }
 
 type renewerService interface {

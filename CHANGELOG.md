@@ -1,6 +1,6 @@
 # Change Log
 
-## [v0.0.18] - 02.09.2024
+## [v0.0.18] - 02.10.2024
 ### Added
 * Added support of lib-errors for main client-wrapper and token-auth
 

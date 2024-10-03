@@ -43,12 +43,15 @@ func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 func NewClient(ctx context.Context, cfg configService) (*service, error) {
 	clientOpts := vaultApi.DefaultConfig()
 	clientOpts.Address = cfg.GetAddress()
+
 	client, err := vaultApi.NewClient(clientOpts)
 	if err != nil {
 		return nil, err
 	}
 
 	auth, err := userpassAuth.NewUserpassAuth(cfg.GetUserName(), &userpassAuth.Password{
+		FromFile:   "",
+		FromEnv:    "",
 		FromString: cfg.GetUserPassword(),
 	})
 	if err != nil {

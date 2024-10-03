@@ -56,19 +56,17 @@ func (s *Service) IsHealed(ctx context.Context) bool {
 	}
 
 	currentTime := time.Now()
-	if currentTime.Unix() > int64(secretData.LeaseDuration) {
-		return false
-	}
 
-	return true
+	return currentTime.Unix() > int64(secretData.LeaseDuration)
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
-func (s *Service) GetCredentialsBytes() (b []byte, err error) {
+func (s *Service) GetCredentialsBytes() ([]byte, error) {
 	secret, err := s.client.Logical().Read(s.cfg.GetDataPath())
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -77,11 +75,12 @@ func (s *Service) GetCredentialsBytes() (b []byte, err error) {
 }
 
 // GetCredentialsBytesByPath returns all secrets bytes from the specified path.
-func (s *Service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
+func (s *Service) GetCredentialsBytesByPath(path string) ([]byte, error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -95,6 +94,7 @@ func (s *Service) GetCredentialsByPathAndKey(path, key string) (string, error) {
 	if err != nil {
 		return "", s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return "", s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -125,6 +125,7 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -166,6 +167,7 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	renewSvc := newRenewer(s.l, s.e,
 		s.clientSvc, renewTTL)
+
 	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err)
@@ -189,6 +191,9 @@ func NewService(
 	return &Service{
 		l: logger,
 		e: errFmtSvc,
+
+		renewerSvc: nil,
+		authInfo:   nil,
 
 		clientSvc: client,
 		cfg:       cfg,
