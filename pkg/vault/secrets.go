@@ -33,14 +33,14 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 			continue
 		}
 
-		b, err := s.GetCredentialsBytesByPath(path)
+		rawBytes, err := s.GetCredentialsBytesByPath(path)
 		if err != nil {
 			return s.e.ErrorNoWrap(err)
 		}
 
 		vars := make(map[string]string)
 
-		err = json.Unmarshal(b, &vars)
+		err = json.Unmarshal(rawBytes, &vars)
 		if err != nil {
 			return s.e.ErrorOnly(err)
 		}

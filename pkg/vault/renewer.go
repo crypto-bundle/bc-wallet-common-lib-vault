@@ -111,7 +111,12 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) error {
 
 func (s *renewer) renew(ctx context.Context, renewClb func()) (renewResult, error) {
 	authTokenWatcher, err := s.client.GetClient().NewLifetimeWatcher(&vaultApi.LifetimeWatcherInput{
-		Secret: s.currentSecret,
+		Secret:        s.currentSecret,
+		Grace:         0,
+		Rand:          nil,
+		RenewBuffer:   0,
+		Increment:     0,
+		RenewBehavior: 0,
 	})
 	if err != nil {
 		return renewError, s.e.ErrorOnly(err, ErrInitTokenTTLWatcherDetail)

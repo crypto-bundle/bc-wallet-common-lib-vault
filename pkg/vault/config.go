@@ -3,6 +3,10 @@ package vault
 import "fmt"
 
 type BaseConfig struct {
+	// config dependencies
+	baseAppCfgSrv baseApplicationConfigService
+	e             errorFormatterService
+	// config fields
 	Host       string `envconfig:"VAULT_SERVICE_HOST" default:"vault"`
 	DataPath   string `envconfig:"VAULT_APP_DATA_PATH" default:""`
 	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
@@ -13,10 +17,6 @@ type BaseConfig struct {
 	Port uint32 `envconfig:"VAULT_SERVICE_PORT" default:"8200"`
 
 	UseHTTPS bool `envconfig:"VAULT_USE_HTTPS" default:"true"`
-
-	// dependencies
-	baseAppCfgSrv baseApplicationConfigService
-	e             errorFormatterService
 }
 
 func (c *BaseConfig) GetAddress() string {

@@ -71,7 +71,12 @@ func (s *Service) GetCredentialsBytes() ([]byte, error) {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
-	return json.Marshal(secret.Data["data"])
+	rawJSONData, err := json.Marshal(secret.Data["data"])
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawJSONData, nil
 }
 
 // GetCredentialsBytesByPath returns all secrets bytes from the specified path.
@@ -85,7 +90,12 @@ func (s *Service) GetCredentialsBytesByPath(path string) ([]byte, error) {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
-	return json.Marshal(secret.Data["data"])
+	rawJSONData, err := json.Marshal(secret.Data["data"])
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawJSONData, nil
 }
 
 // GetCredentialsByPathAndKey returns secret by path and field.
@@ -196,7 +206,9 @@ func NewService(
 		authInfo:   nil,
 
 		clientSvc: client,
-		cfg:       cfg,
+		client:    nil,
+
+		cfg: cfg,
 
 		loadedSecrets: make(map[string]string),
 	}, nil

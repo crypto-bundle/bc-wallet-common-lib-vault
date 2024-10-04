@@ -126,6 +126,16 @@ linters-settings:
           - github.com/crypto-bundle/
           - github.com/hashicorp/
 
+  varnamelen:
+    ignore-type-assert-ok: true
+    ignore-map-index-ok: true
+    ignore-names:
+      - err
+      - wg
+      - ctx
+    ignore-decls:
+      - i int
+
 issues:
   exclude-rules:
     - linters:

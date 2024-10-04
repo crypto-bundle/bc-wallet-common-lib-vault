@@ -32,6 +32,7 @@ func (s *service) Login(_ context.Context) (*vaultApi.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	if secret == nil {
 		return nil, ErrEmptySecret
 	}
@@ -52,7 +53,8 @@ func NewClient(_ context.Context, cfg configService) (*service, error) {
 	}
 
 	return &service{
-		client: client,
-		cfg:    cfg,
+		vaultConfig: nil,
+		client:      client,
+		cfg:         cfg,
 	}, nil
 }

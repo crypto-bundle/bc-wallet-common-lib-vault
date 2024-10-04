@@ -72,7 +72,12 @@ func (s *encryptor) Decrypt(cipherBytes []byte) ([]byte, error) {
 		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
 	}
 
-	return b64.StdEncoding.DecodeString(decrValStr)
+	rawData, err := b64.StdEncoding.DecodeString(decrValStr)
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawData, nil
 }
 
 func NewEncryptService(errFmtSvc errorFormatterService,
