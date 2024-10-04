@@ -27,8 +27,8 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 
 	vaultPrefix := s.cfg.GetApplicationStageName()
 
-	for _, v := range paths {
-		path := strings.TrimSpace(v)
+	for _, vaultBucketPath := range paths {
+		path := strings.TrimSpace(vaultBucketPath)
 		if path == "" {
 			continue
 		}
@@ -46,14 +46,15 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 		}
 
 		currentVars := make(map[string]string)
-		for k, vv := range vars {
-			fk := strings.TrimPrefix(k, vaultPrefix+vaultVarPrefixDelimiter)
 
-			_, existsInFinalVars := finalVars[k]
+		for key, vaultValue := range vars {
+			fk := strings.TrimPrefix(key, vaultPrefix+vaultVarPrefixDelimiter)
+
+			_, existsInFinalVars := finalVars[key]
 			_, existsInFinalVarsWithoutPrefix := finalVars[fk]
 
 			if !existsInFinalVars && !existsInFinalVarsWithoutPrefix {
-				currentVars[k] = vv
+				currentVars[key] = vaultValue
 			}
 		}
 
