@@ -145,18 +145,18 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 		return nil, s.e.ErrorOnly(ErrCastSecret)
 	}
 
-	for _, k := range keys {
-		keyVal, isExists := data[k]
+	for _, key := range keys {
+		keyVal, isExists := data[key]
 		if !isExists {
-			return res, s.e.ErrorOnly(ErrNotExistingKey, k)
+			return res, s.e.ErrorOnly(ErrNotExistingKey, key)
 		}
 
 		keyString, isExists := keyVal.(string)
 		if !isExists {
-			return res, s.e.ErrorOnly(ErrKeyType, k)
+			return res, s.e.ErrorOnly(ErrKeyType, key)
 		}
 
-		res[k] = keyString
+		res[key] = keyString
 	}
 
 	return res, nil

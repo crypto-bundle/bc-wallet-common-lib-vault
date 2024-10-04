@@ -110,7 +110,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := make(chan os.Signal)
+	c := make(chan os.Signal, 2)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	<-c
 	cancelCtxFunc()

@@ -13,6 +13,7 @@ var (
 )
 
 type service struct {
+	e   errorFormatterService
 	cfg configService
 
 	auth        *userpassAuth.UserpassAuth
@@ -27,11 +28,11 @@ func (s *service) GetClient() *vaultApi.Client {
 func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 	secret, err := s.client.Auth().Login(ctx, s.auth)
 	if err != nil {
-		return nil, err
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	if secret == nil {
-		return nil, ErrEmptySecret
+		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
 	s.client.SetToken(secret.Auth.ClientToken)
@@ -41,13 +42,16 @@ func (s *service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 // NewClient initialize vault client with user and password
 // authentication.
-func NewClient(ctx context.Context, cfg configService) (*service, error) {
+func NewClient(_ context.Context,
+	errFmtSvc errorFormatterService,
+	cfg configService,
+) (*service, error) {
 	clientOpts := vaultApi.DefaultConfig()
 	clientOpts.Address = cfg.GetAddress()
 
 	client, err := vaultApi.NewClient(clientOpts)
 	if err != nil {
-		return nil, err
+		return nil, errFmtSvc.ErrorOnly(err)
 	}
 
 	auth, err := userpassAuth.NewUserpassAuth(cfg.GetUserName(), &userpassAuth.Password{
@@ -56,13 +60,16 @@ func NewClient(ctx context.Context, cfg configService) (*service, error) {
 		FromString: cfg.GetUserPassword(),
 	})
 	if err != nil {
-		return nil, err
+		return nil, errFmtSvc.ErrorOnly(err)
 	}
 
 	return &service{
+		e: errFmtSvc,
+
 		vaultConfig: nil,
-		client:      client,
-		cfg:         cfg,
-		auth:        auth,
+
+		client: client,
+		cfg:    cfg,
+		auth:   auth,
 	}, nil
 }
