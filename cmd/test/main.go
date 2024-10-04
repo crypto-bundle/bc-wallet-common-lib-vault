@@ -63,8 +63,9 @@ func (f *errFmt) NewErrorf(_ string, _ ...interface{}) error {
 
 func main() {
 	const (
-		DefaultTokenRenewTTL       = 960
-		DefaultVaultConnectionPOrt = 8200
+		DefaultTokenRenewTTL        = 960
+		DefaultVaultConnectionPOrt  = 8200
+		DefaultOsSignalsChannelSize = 2
 	)
 
 	type VaultWrappedConfig struct {
@@ -110,7 +111,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c := make(chan os.Signal, 2)
+	c := make(chan os.Signal, DefaultOsSignalsChannelSize)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	<-c
 	cancelCtxFunc()

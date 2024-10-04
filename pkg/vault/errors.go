@@ -12,7 +12,6 @@ const (
 	ErrUserpassLoginDetail       = "unable to log in with user and password"
 	ErrNotExistingAuthInfoDetail = "no auth info was returned after login"
 	ErrReadSecretDetail          = "unable to read secret"
-	ErrEmptySecretDetail         = "unable to get secret"
 	ErrCastSecretDetail          = "secret casting error"
 	ErrNotExistingKeyDetail      = "missed key in secret"
 	ErrKeyTypeDetail             = "unexpected key type in secret"
@@ -25,7 +24,7 @@ const (
 var (
 	ErrConfigIsNotValid    = errors.New("config is not valid.some fields are missing")
 	ErrReadSecret          = errors.New(ErrReadSecretDetail)
-	ErrEmptySecret         = errors.New(ErrEmptySecretDetail)
+	ErrEmptySecret         = errors.New("unable to get secret")
 	ErrCastSecret          = errors.New(ErrCastSecretDetail)
 	ErrNotExistingKey      = errors.New(ErrNotExistingKeyDetail)
 	ErrKeyType             = errors.New(ErrKeyTypeDetail)

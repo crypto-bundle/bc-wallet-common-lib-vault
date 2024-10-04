@@ -2,10 +2,9 @@ package vault
 
 import (
 	"context"
+	"encoding/base64"
 
-	b64 "encoding/base64"
-
-	vaultApi "github.com/hashicorp/vault/api"
+	"github.com/hashicorp/vault/api"
 )
 
 const (
@@ -18,7 +17,7 @@ const (
 type encryptor struct {
 	e errorFormatterService
 
-	client *vaultApi.Client
+	client *api.Client
 
 	transitKey string
 }
@@ -34,7 +33,7 @@ func (s *encryptor) IsHealed(_ context.Context) bool {
 
 // Encrypt get encrypted ciphertext bytes via vault transit secret engine.
 func (s *encryptor) Encrypt(toEncrypt []byte) ([]byte, error) {
-	b64Val := b64.StdEncoding.EncodeToString(toEncrypt)
+	b64Val := base64.StdEncoding.EncodeToString(toEncrypt)
 	path := encryptPath + s.transitKey
 
 	secret, err := s.client.Logical().Write(path, map[string]interface{}{
@@ -72,7 +71,7 @@ func (s *encryptor) Decrypt(cipherBytes []byte) ([]byte, error) {
 		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
 	}
 
-	rawData, err := b64.StdEncoding.DecodeString(decrValStr)
+	rawData, err := base64.StdEncoding.DecodeString(decrValStr)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err)
 	}

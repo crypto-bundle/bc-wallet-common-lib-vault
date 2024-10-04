@@ -14,6 +14,10 @@ func (c *AuthConfig) GetGithubAuthToken() string {
 }
 
 func (c *AuthConfig) Prepare() error {
+	if c.AuthPath == "" {
+		c.AuthPath = githubDefaultAuthPath
+	}
+
 	return nil
 }
 

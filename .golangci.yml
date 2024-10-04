@@ -75,7 +75,7 @@ linters-settings:
     # Default: ["standard", "default"]
     sections:
       - standard # Standard section: captures all standard packages.
-      - alias # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
+#      - alias # Alias section: contains all alias imports. This section is not present unless explicitly enabled.
       - localmodule # Local module section: contains all local packages. This section is not present unless explicitly enabled.
       - default # Default section: contains all imports that could not be matched to another section type.
       - prefix(github.com/crypto-bundle/) # Custom section: groups all imports with the specified Prefix.

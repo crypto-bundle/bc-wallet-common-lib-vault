@@ -9,18 +9,6 @@ import (
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
-// Values for vault authentication method used by this library.
-// Remember the environment values are case-sensitive.
-const (
-	authMethodGithub     = "github"
-	authMethodKubernetes = "kubernetes"
-	authMethodUserpass   = "userpass"
-	authMethodToken      = "token"
-	authMethodNone       = "none" // no vault is used, just get values from env variables
-
-	defaultAuthMethod = authMethodKubernetes
-)
-
 type Service struct {
 	l *log.Logger
 	e errorFormatterService

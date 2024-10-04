@@ -73,21 +73,17 @@ func (s *renewer) PrepareAndStartRenew(ctx context.Context) error {
 	wg.Add(1)
 
 	go func() {
-		err = s.startRenew(ctx, sync.OnceFunc(func() {
+		s.startRenew(ctx, sync.OnceFunc(func() {
 			wg.Done()
 		}))
 	}()
 
 	wg.Wait()
 
-	if err != nil {
-		return s.e.ErrorNoWrap(err)
-	}
-
 	return nil
 }
 
-func (s *renewer) startRenew(ctx context.Context, renewClb func()) error {
+func (s *renewer) startRenew(ctx context.Context, renewClb func()) {
 	for {
 		renewed, loopErr := s.renew(ctx, renewClb)
 		if loopErr != nil {
@@ -95,7 +91,7 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) error {
 		}
 
 		if renewed&exitRequested != 0 {
-			return nil
+			return
 		}
 
 		if renewed&expiringAuthToken != 0 {

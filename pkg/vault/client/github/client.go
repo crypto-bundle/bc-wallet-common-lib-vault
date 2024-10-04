@@ -11,8 +11,6 @@ var (
 	ErrEmptySecret = errors.New("unable to get secret")
 )
 
-const githubAuthPath = "auth/github/login"
-
 type service struct {
 	e   errorFormatterService
 	cfg configService
