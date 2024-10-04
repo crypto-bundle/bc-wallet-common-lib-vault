@@ -3,20 +3,20 @@ package vault
 import "fmt"
 
 type BaseConfig struct {
+	// config dependencies
+	baseAppCfgSrv baseApplicationConfigService
+	e             errorFormatterService
+	// config fields
 	Host       string `envconfig:"VAULT_SERVICE_HOST" default:"vault"`
-	Port       uint32 `envconfig:"VAULT_SERVICE_PORT" default:"8200"`
-	UseHTTPS   bool   `envconfig:"VAULT_USE_HTTPS" default:"true"`
+	DataPath   string `envconfig:"VAULT_APP_DATA_PATH" default:""`
 	AuthMethod string `envconfig:"VAULT_AUTH_METHOD" default:"token"`
-
 	// TokenRenewTTL - value in seconds of increment token expiration time.
 	// If you want to disable renewal flow - you can set zero value
 	TokenRenewTTL int `envconfig:"VAULT_AUTH_TOKEN_RENEW_TTL" default:"240"`
 
-	DataPath string `envconfig:"VAULT_APP_DATA_PATH" default:""`
+	Port uint32 `envconfig:"VAULT_SERVICE_PORT" default:"8200"`
 
-	// dependencies
-	baseAppCfgSrv baseApplicationConfigService
-	e             errorFormatterService
+	UseHTTPS bool `envconfig:"VAULT_USE_HTTPS" default:"true"`
 }
 
 func (c *BaseConfig) GetAddress() string {

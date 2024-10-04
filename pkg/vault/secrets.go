@@ -11,7 +11,7 @@ const (
 	vaultDataPathDelimiter  = "," // vault DataPath env variable can be a list of paths, separated by delimiter
 )
 
-func (s *Service) GetByName(keyName string) (data string, isExists bool) {
+func (s *Service) GetByName(keyName string) (string, bool) {
 	secretData, isExists := s.loadedSecrets[keyName]
 	if !isExists {
 		return "", false
@@ -27,32 +27,34 @@ func (s *Service) LoadSecrets(_ context.Context) error {
 
 	vaultPrefix := s.cfg.GetApplicationStageName()
 
-	for _, v := range paths {
-		path := strings.TrimSpace(v)
+	for _, vaultBucketPath := range paths {
+		path := strings.TrimSpace(vaultBucketPath)
 		if path == "" {
 			continue
 		}
 
-		b, err := s.GetCredentialsBytesByPath(path)
+		rawBytes, err := s.GetCredentialsBytesByPath(path)
 		if err != nil {
 			return s.e.ErrorNoWrap(err)
 		}
 
 		vars := make(map[string]string)
-		err = json.Unmarshal(b, &vars)
+
+		err = json.Unmarshal(rawBytes, &vars)
 		if err != nil {
 			return s.e.ErrorOnly(err)
 		}
 
 		currentVars := make(map[string]string)
-		for k, vv := range vars {
-			fk := strings.TrimPrefix(k, vaultPrefix+vaultVarPrefixDelimiter)
 
-			_, existsInFinalVars := finalVars[k]
+		for key, vaultValue := range vars {
+			fk := strings.TrimPrefix(key, vaultPrefix+vaultVarPrefixDelimiter)
+
+			_, existsInFinalVars := finalVars[key]
 			_, existsInFinalVarsWithoutPrefix := finalVars[fk]
 
 			if !existsInFinalVars && !existsInFinalVarsWithoutPrefix {
-				currentVars[k] = vv
+				currentVars[key] = vaultValue
 			}
 		}
 

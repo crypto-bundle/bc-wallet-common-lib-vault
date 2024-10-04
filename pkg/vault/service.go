@@ -3,26 +3,18 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
-// Values for vault authentication method used by this library.
-// Remember the environment values are case-sensitive.
-const (
-	authMethodGithub     = "github"
-	authMethodKubernetes = "kubernetes"
-	authMethodUserpass   = "userpass"
-	authMethodToken      = "token"
-	authMethodNone       = "none" // no vault is used, just get values from env variables
-
-	defaultAuthMethod = authMethodKubernetes
+var (
+	_ Vaulter = (*Service)(nil)
 )
 
 type Service struct {
-	l *log.Logger
+	l *slog.Logger
 	e errorFormatterService
 
 	client     *vaultApi.Client
@@ -56,37 +48,50 @@ func (s *Service) IsHealed(ctx context.Context) bool {
 	}
 
 	currentTime := time.Now()
-	if currentTime.Unix() > int64(secretData.LeaseDuration) {
-		return false
-	}
 
-	return true
+	return currentTime.Unix() > int64(secretData.LeaseDuration)
+}
+
+func (s *Service) GetAuthMethod() string {
+	return s.clientSvc.GetAuthMethod()
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
-func (s *Service) GetCredentialsBytes() (b []byte, err error) {
+func (s *Service) GetCredentialsBytes() ([]byte, error) {
 	secret, err := s.client.Logical().Read(s.cfg.GetDataPath())
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
-	return json.Marshal(secret.Data["data"])
+	rawJSONData, err := json.Marshal(secret.Data["data"])
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawJSONData, nil
 }
 
 // GetCredentialsBytesByPath returns all secrets bytes from the specified path.
-func (s *Service) GetCredentialsBytesByPath(path string) (b []byte, err error) {
+func (s *Service) GetCredentialsBytesByPath(path string) ([]byte, error) {
 	secret, err := s.client.Logical().Read(path)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
 
-	return json.Marshal(secret.Data["data"])
+	rawJSONData, err := json.Marshal(secret.Data["data"])
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawJSONData, nil
 }
 
 // GetCredentialsByPathAndKey returns secret by path and field.
@@ -95,6 +100,7 @@ func (s *Service) GetCredentialsByPathAndKey(path, key string) (string, error) {
 	if err != nil {
 		return "", s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return "", s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -125,6 +131,7 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 	if err != nil {
 		return nil, s.e.ErrorOnly(err, ErrReadSecretDetail)
 	}
+
 	if secret == nil {
 		return nil, s.e.ErrorOnly(ErrEmptySecret)
 	}
@@ -134,18 +141,18 @@ func (s *Service) GetCredentialsByPathAndKeys(path string, keys ...string) (map[
 		return nil, s.e.ErrorOnly(ErrCastSecret)
 	}
 
-	for _, k := range keys {
-		keyVal, isExists := data[k]
+	for _, key := range keys {
+		keyVal, isExists := data[key]
 		if !isExists {
-			return res, s.e.ErrorOnly(ErrNotExistingKey, k)
+			return res, s.e.ErrorOnly(ErrNotExistingKey, key)
 		}
 
 		keyString, isExists := keyVal.(string)
 		if !isExists {
-			return res, s.e.ErrorOnly(ErrKeyType, k)
+			return res, s.e.ErrorOnly(ErrKeyType, key)
 		}
 
-		res[k] = keyString
+		res[key] = keyString
 	}
 
 	return res, nil
@@ -166,6 +173,7 @@ func (s *Service) Login(ctx context.Context) (*vaultApi.Client, error) {
 
 	renewSvc := newRenewer(s.l, s.e,
 		s.clientSvc, renewTTL)
+
 	err = renewSvc.PrepareAndStartRenew(ctx)
 	if err != nil {
 		return nil, s.e.ErrorOnly(err)
@@ -180,18 +188,23 @@ func (s *Service) GetClient() *vaultApi.Client {
 	return s.client
 }
 
-func NewService(
-	logger *log.Logger,
+func NewService(logBuilder loggerFabricService,
 	errFmtSvc errorFormatterService,
 	cfg configService,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		l: logger,
+		l: logBuilder.NewSlogNamedLoggerEntry("vault",
+			slog.String(AuthMethodNameTag, client.GetAuthMethod())),
 		e: errFmtSvc,
 
+		renewerSvc: nil,
+		authInfo:   nil,
+
 		clientSvc: client,
-		cfg:       cfg,
+		client:    nil,
+
+		cfg: cfg,
 
 		loadedSecrets: make(map[string]string),
 	}, nil

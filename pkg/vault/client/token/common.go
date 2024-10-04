@@ -1,5 +1,17 @@
 package token
 
+import (
+	"context"
+
+	vaultApi "github.com/hashicorp/vault/api"
+)
+
+type selfService interface {
+	GetAuthMethod() string
+	GetClient() *vaultApi.Client
+	Login(ctx context.Context) (*vaultApi.Client, error)
+}
+
 type errorFormatterService interface {
 	ErrorWithCode(err error, code int) error
 	ErrWithCode(err error, code int) error

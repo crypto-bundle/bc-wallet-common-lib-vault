@@ -2,8 +2,13 @@ package vault
 
 import (
 	"context"
-	b64 "encoding/base64"
-	vaultApi "github.com/hashicorp/vault/api"
+	"encoding/base64"
+
+	"github.com/hashicorp/vault/api"
+)
+
+var (
+	_ Encryptor = (*encryptor)(nil)
 )
 
 const (
@@ -16,8 +21,9 @@ const (
 type encryptor struct {
 	e errorFormatterService
 
+	client *api.Client
+
 	transitKey string
-	client     *vaultApi.Client
 }
 
 func (s *encryptor) IsHealed(_ context.Context) bool {
@@ -31,7 +37,7 @@ func (s *encryptor) IsHealed(_ context.Context) bool {
 
 // Encrypt get encrypted ciphertext bytes via vault transit secret engine.
 func (s *encryptor) Encrypt(toEncrypt []byte) ([]byte, error) {
-	b64Val := b64.StdEncoding.EncodeToString(toEncrypt)
+	b64Val := base64.StdEncoding.EncodeToString(toEncrypt)
 	path := encryptPath + s.transitKey
 
 	secret, err := s.client.Logical().Write(path, map[string]interface{}{
@@ -42,6 +48,7 @@ func (s *encryptor) Encrypt(toEncrypt []byte) ([]byte, error) {
 	}
 
 	encrVal := secret.Data[cipherTxt]
+
 	encrValStr, ok := encrVal.(string)
 	if !ok {
 		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
@@ -62,12 +69,18 @@ func (s *encryptor) Decrypt(cipherBytes []byte) ([]byte, error) {
 	}
 
 	decrVal := secret.Data[plainTxt]
+
 	decrValStr, ok := decrVal.(string)
 	if !ok {
 		return nil, s.e.ErrorOnly(ErrTransitSecretFormat)
 	}
 
-	return b64.StdEncoding.DecodeString(decrValStr)
+	rawData, err := base64.StdEncoding.DecodeString(decrValStr)
+	if err != nil {
+		return nil, s.e.ErrorOnly(err)
+	}
+
+	return rawData, nil
 }
 
 func NewEncryptService(errFmtSvc errorFormatterService,

@@ -11,10 +11,11 @@ var (
 )
 
 type AuthConfig struct {
-	AuthToken         string `envconfig:"VAULT_AUTH_TOKEN" default:""`
-	AuthTokenFilePath string `envconfig:"VAULT_AUTH_TOKEN_FILE_PATH" default:"/vault/secrets/token"`
 	// config dependencies
 	e errorFormatterService
+	// config fields
+	AuthToken         string `envconfig:"VAULT_AUTH_TOKEN" default:""`
+	AuthTokenFilePath string `envconfig:"VAULT_AUTH_TOKEN_FILE_PATH" default:"/vault/secrets/token"`
 }
 
 func (c *AuthConfig) GetAuthToken() string {

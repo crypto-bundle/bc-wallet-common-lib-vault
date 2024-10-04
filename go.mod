@@ -6,7 +6,6 @@ require (
 	github.com/hashicorp/vault/api v1.13.0
 	github.com/hashicorp/vault/api/auth/kubernetes v0.6.0
 	github.com/hashicorp/vault/api/auth/userpass v0.6.0
-	golang.org/x/sync v0.1.0
 )
 
 require (

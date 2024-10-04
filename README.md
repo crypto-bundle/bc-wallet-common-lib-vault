@@ -26,6 +26,7 @@ import (
 
 	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
 	commonErr "github.com/crypto-bundle/bc-wallet-common-lib-errors/pkg/errformatter"
+	commonLogger "github.com/crypto-bundle/bc-wallet-common-lib-logger/pkg/logger"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
@@ -48,15 +49,16 @@ func main() {
 		panic(err)
 	}
 
-	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
+	logBuilderSvc := commonLogger.NewSlogNamedLoggerEntry("vault")
+	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
+	
+	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, errFmtSvc, vaultCfg)
 	if err != nil {
 		panic(err)
 	}
 
-	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
-
 	// vault prepare 
-	vaultSvc, err := commonVault.NewService(ctx, errFmtSvc, vaultCfg, vaultClientSvc)
+	vaultSvc, err := commonVault.NewService(logBuilderSvc, errFmtSvc, vaultCfg, vaultClientSvc)
 	if err != nil {
 		panic(err)
 	}
@@ -93,6 +95,7 @@ import (
 
 	commonEnvConfig "github.com/crypto-bundle/bc-wallet-common-lib-config/pkg/config"
 	commonErr "github.com/crypto-bundle/bc-wallet-common-lib-errors/pkg/errformatter"
+	commonLogger "github.com/crypto-bundle/bc-wallet-common-lib-logger/pkg/logger"
 	commonVault "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault"
 	commonVaultTokenClient "github.com/crypto-bundle/bc-wallet-common-lib-vault/pkg/vault/client/token"
 )
@@ -115,15 +118,16 @@ func main() {
 		panic(err)
 	}
 
-	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, vaultCfg)
+	logBuilderSvc := commonLogger.NewSlogNamedLoggerEntry("vault")
+	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
+
+	vaultClientSvc, err := commonVaultTokenClient.NewClient(ctx, errFmtSvc, vaultCfg)
 	if err != nil {
 		panic(err)
 	}
 
-	errFmtSvc := commonErr.NewScopedErrorFormatter("vault")
-
 	// vault prepare 
-	vaultSvc, err := commonVault.NewService(ctx, errFmtSvc, vaultCfg, vaultClientSvc)
+	vaultSvc, err := commonVault.NewService(logBuilderSvc, errFmtSvc, vaultCfg, vaultClientSvc)
 	if err != nil {
 		panic(err)
 	}
@@ -152,4 +156,4 @@ func main() {
 
 ## Licence
 
-**bc-wallet-common-lib-vault** is licensed under the [MIT](./LICENSE) License.
+**bc-wallet-common-lib-vault** is licensed under the [MIT NON-AI](./LICENSE) License.

@@ -1,6 +1,15 @@
 # Change Log
 
-## [v0.0.18] - 02.09.2024
+## [v0.0.19] - 04.10.2024
+### Added
+* Added support of last lib-logger version
+* Added support of lib-errors for client auth flow:
+  * github
+  * kubernates
+  * userpass
+* Added linters config and fixed all linter issues
+
+## [v0.0.18] - 02.10.2024
 ### Added
 * Added support of lib-errors for main client-wrapper and token-auth
 
