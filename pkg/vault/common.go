@@ -2,6 +2,7 @@ package vault
 
 import (
 	"context"
+	"log/slog"
 
 	vaultApi "github.com/hashicorp/vault/api"
 )
@@ -44,6 +45,7 @@ type configService interface {
 }
 
 type clientService interface {
+	GetAuthMethod() string
 	GetClient() *vaultApi.Client
 	Login(ctx context.Context) (*vaultApi.Client, error)
 }
@@ -58,14 +60,22 @@ type baseApplicationConfigService interface {
 	GetStageName() string
 }
 
-type Vaulter interface {
+type Encryptor interface {
 	Encrypt(toEncrypt []byte) ([]byte, error)
 	Decrypt(cipherBytes []byte) ([]byte, error)
+}
 
+type Vaulter interface {
 	GetCredentialsBytes() (b []byte, err error)
 	GetCredentialsBytesByPath(path string) (b []byte, err error)
 	GetCredentialsByPathAndKey(path, field string) (string, error)
 	GetCredentialsByPathAndKeys(path string, fields ...string) (map[string]string, error)
+}
+
+type loggerFabricService interface {
+	NewSlogLoggerEntry(fields ...any) *slog.Logger
+	NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger
+	NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger
 }
 
 type errorFormatterService interface {

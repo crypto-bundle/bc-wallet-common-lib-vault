@@ -3,14 +3,18 @@ package vault
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
+var (
+	_ Vaulter = (*Service)(nil)
+)
+
 type Service struct {
-	l *log.Logger
+	l *slog.Logger
 	e errorFormatterService
 
 	client     *vaultApi.Client
@@ -46,6 +50,10 @@ func (s *Service) IsHealed(ctx context.Context) bool {
 	currentTime := time.Now()
 
 	return currentTime.Unix() > int64(secretData.LeaseDuration)
+}
+
+func (s *Service) GetAuthMethod() string {
+	return s.clientSvc.GetAuthMethod()
 }
 
 // GetCredentialsBytes returns all secrets bytes from default path.
@@ -180,14 +188,14 @@ func (s *Service) GetClient() *vaultApi.Client {
 	return s.client
 }
 
-func NewService(
-	logger *log.Logger,
+func NewService(logBuilder loggerFabricService,
 	errFmtSvc errorFormatterService,
 	cfg configService,
 	client clientService,
 ) (*Service, error) {
 	return &Service{
-		l: logger,
+		l: logBuilder.NewSlogNamedLoggerEntry("vault",
+			slog.String(AuthMethodNameTag, client.GetAuthMethod())),
 		e: errFmtSvc,
 
 		renewerSvc: nil,

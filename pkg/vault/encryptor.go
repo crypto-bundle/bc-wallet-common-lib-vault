@@ -7,6 +7,10 @@ import (
 	"github.com/hashicorp/vault/api"
 )
 
+var (
+	_ Encryptor = (*encryptor)(nil)
+)
+
 const (
 	plainTxt    = "plaintext"
 	cipherTxt   = "ciphertext"

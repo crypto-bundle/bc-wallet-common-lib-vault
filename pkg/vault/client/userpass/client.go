@@ -8,7 +8,11 @@ import (
 	userpassAuth "github.com/hashicorp/vault/api/auth/userpass"
 )
 
+const AuthMethodName = "userpass"
+
 var (
+	_ selfService = (*service)(nil)
+
 	ErrEmptySecret = errors.New("unable to get secret")
 )
 
@@ -19,6 +23,10 @@ type service struct {
 	auth        *userpassAuth.UserpassAuth
 	vaultConfig *vaultApi.Config
 	client      *vaultApi.Client
+}
+
+func (s *service) GetAuthMethod() string {
+	return AuthMethodName
 }
 
 func (s *service) GetClient() *vaultApi.Client {

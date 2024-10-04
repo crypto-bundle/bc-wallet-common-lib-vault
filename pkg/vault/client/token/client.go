@@ -6,12 +6,20 @@ import (
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
+const AuthMethodName = "token"
+
+var _ selfService = (*service)(nil)
+
 type service struct {
 	e errorFormatterService
 
 	vaultConfig *vaultApi.Config
 	client      *vaultApi.Client
 	cfg         configService
+}
+
+func (s *service) GetAuthMethod() string {
+	return AuthMethodName
 }
 
 func (s *service) GetClient() *vaultApi.Client {

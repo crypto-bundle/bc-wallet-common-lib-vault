@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +14,20 @@ import (
 )
 
 var ErrMockFormatter = errors.New("mock_err_formatter")
+
+type loggBuilder struct{}
+
+func (f *loggBuilder) NewSlogLoggerEntry(fields ...any) *slog.Logger {
+	return slog.Default()
+}
+
+func (f *loggBuilder) NewSlogNamedLoggerEntry(named string, fields ...any) *slog.Logger {
+	return slog.Default()
+}
+
+func (f *loggBuilder) NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Logger {
+	return slog.Default()
+}
 
 type errFmt struct {
 }
@@ -94,6 +109,7 @@ func main() {
 	}
 
 	mockErrFmtSvc := &errFmt{}
+	mockLoggBuilder := &loggBuilder{}
 	ctx, cancelCtxFunc := context.WithCancel(context.Background())
 
 	vaultClientSrv, err := commonVaultTokenClient.NewClient(ctx, mockErrFmtSvc, vaultCfg)
@@ -101,7 +117,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	vaultSrv, err := commonVault.NewService(log.Default(), mockErrFmtSvc, vaultCfg, vaultClientSrv)
+	vaultSrv, err := commonVault.NewService(mockLoggBuilder, mockErrFmtSvc, vaultCfg, vaultClientSrv)
 	if err != nil {
 		log.Fatal(err)
 	}

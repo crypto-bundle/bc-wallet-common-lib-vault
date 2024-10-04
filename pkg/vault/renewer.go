@@ -2,7 +2,7 @@ package vault
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"sync"
 
 	vaultApi "github.com/hashicorp/vault/api"
@@ -17,7 +17,7 @@ const (
 )
 
 type renewer struct {
-	l *log.Logger
+	l *slog.Logger
 	e errorFormatterService
 
 	client        clientService
@@ -53,7 +53,7 @@ func (s *renewer) prepareRenew(_ context.Context) error {
 
 	secret, loopErr := token.RenewSelf(s.defaultTTL)
 	if loopErr != nil {
-		s.l.Printf("vault token renew error: %v", loopErr)
+		s.l.Error("vault token renew error", loopErr)
 
 		return s.e.ErrorOnly(loopErr, ErrUnableGetTokenInfoDetail)
 	}
@@ -87,7 +87,7 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) {
 	for {
 		renewed, loopErr := s.renew(ctx, renewClb)
 		if loopErr != nil {
-			s.l.Printf("vault token renew error: %v", loopErr)
+			s.l.Error("vault token renew error", loopErr)
 		}
 
 		if renewed&exitRequested != 0 {
@@ -97,10 +97,10 @@ func (s *renewer) startRenew(ctx context.Context, renewClb func()) {
 		if renewed&expiringAuthToken != 0 {
 			_, loginErr := s.client.Login(ctx)
 			if loginErr != nil {
-				s.l.Printf("login authentication error: %v", loginErr)
+				s.l.Error("login authentication error", loginErr)
 			}
 
-			s.l.Printf("reconnect and renew")
+			s.l.Info("reconnect and renew")
 		}
 	}
 }
@@ -129,21 +129,21 @@ func (s *renewer) renew(ctx context.Context, renewClb func()) (renewResult, erro
 			return exitRequested, nil
 
 		case doneErr, isClosed := <-authTokenWatcher.DoneCh():
-			s.l.Printf("auth token: done with err: %s and chan is closed: %t",
-				doneErr, isClosed)
+			s.l.Error("renew auth token done with err, and chan is closed",
+				doneErr, slog.Bool(RenewTokenChannelStatusTag, isClosed))
 
 			return expiringAuthToken, s.e.ErrorNoWrap(doneErr)
 
 		case info := <-authTokenWatcher.RenewCh():
 			s.currentSecret = info.Secret
 
-			s.l.Printf("auth token: successfully renewed; remaining duration: %ds",
-				info.Secret.Auth.LeaseDuration)
+			s.l.Info("successfully renewed",
+				slog.Int(RenewTokenLeaseDurationTag, info.Secret.Auth.LeaseDuration))
 		}
 	}
 }
 
-func newRenewer(logger *log.Logger,
+func newRenewer(logger *slog.Logger,
 	errFmtSvc errorFormatterService,
 	clientSvc clientService,
 	defaultTTL int,

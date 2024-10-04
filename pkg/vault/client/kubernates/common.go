@@ -1,5 +1,17 @@
 package kubernates
 
+import (
+	"context"
+
+	vaultApi "github.com/hashicorp/vault/api"
+)
+
+type selfService interface {
+	GetAuthMethod() string
+	GetClient() *vaultApi.Client
+	Login(ctx context.Context) (*vaultApi.Client, error)
+}
+
 type configService interface {
 	GetAddress() string
 	GetHost() string

@@ -7,7 +7,11 @@ import (
 	vaultApi "github.com/hashicorp/vault/api"
 )
 
+const AuthMethodName = "github"
+
 var (
+	_ selfService = (*service)(nil)
+
 	ErrEmptySecret = errors.New("unable to get secret")
 )
 
@@ -17,6 +21,10 @@ type service struct {
 
 	vaultConfig *vaultApi.Config
 	client      *vaultApi.Client
+}
+
+func (s *service) GetAuthMethod() string {
+	return AuthMethodName
 }
 
 func (s *service) GetClient() *vaultApi.Client {
