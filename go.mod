@@ -1,6 +1,6 @@
 module github.com/crypto-bundle/bc-wallet-common-lib-vault
 
-go 1.22
+go 1.23
 
 require (
 	github.com/hashicorp/vault/api v1.13.0

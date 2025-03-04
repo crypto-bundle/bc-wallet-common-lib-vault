@@ -1,5 +1,10 @@
 # Change Log
 
+## [v0.0.20] - 04.03.2025
+### Changed
+* Added support last lib-tinyerrors/lib-errors version
+* Added support of Go 1.23
+
 ## [v0.0.19] - 04.10.2024
 ### Added
 * Added support of last lib-logger version
