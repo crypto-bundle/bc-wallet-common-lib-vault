@@ -32,6 +32,18 @@ func (f *loggBuilder) NewSlogLoggerEntryWithFields(fields ...slog.Attr) *slog.Lo
 type errFmt struct {
 }
 
+func (f *errFmt) NewErrorWithCode(text string, code int) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrorCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
+}
+
+func (f *errFmt) ErrCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
+}
+
 func (f *errFmt) ErrorWithCode(_ error, _ int) error {
 	return ErrMockFormatter
 }
