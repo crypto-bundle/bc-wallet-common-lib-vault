@@ -1,5 +1,16 @@
 # Change Log
 
+## [v0.0.21] - 27.04.2025
+### Changed
+* Bump versions of dependency libraries
+  * github.com/go-jose/go-jose
+  * github.com/hashicorp/go-retryablehttp
+* Copyright changes:
+  * Changed copyright in LICENSE file 
+  * Added copyright banner to all *.go files
+### Fixed
+* Fixed some linter issues
+
 ## [v0.0.20] - 04.03.2025
 ### Changed
 * Added support last lib-tinyerrors/lib-errors version
