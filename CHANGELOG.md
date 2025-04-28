@@ -1,5 +1,9 @@
 # Change Log
 
+## [v0.0.22] - 28.04.2025
+### Changed
+* Removed 1.24 toolchain - main version go1.23
+
 ## [v0.0.21] - 27.04.2025
 ### Changed
 * Bump versions of dependency libraries

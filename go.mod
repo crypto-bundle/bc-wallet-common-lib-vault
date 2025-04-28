@@ -2,8 +2,6 @@ module github.com/crypto-bundle/bc-wallet-common-lib-vault
 
 go 1.23.0
 
-toolchain go1.24.0
-
 require (
 	github.com/hashicorp/vault/api v1.13.0
 	github.com/hashicorp/vault/api/auth/kubernetes v0.6.0
